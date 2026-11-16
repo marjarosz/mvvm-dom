@@ -1,0 +1,66 @@
+{
+  "name": "mvvm-dom",
+  "version": "1.0.0",
+  "description": "Dependency-free MVVM library for the DOM",
+  "keywords": [
+    "mvvm",
+    "dom",
+    "data-binding",
+    "viewmodel",
+    "observable",
+    "dependency-properties",
+    "commands",
+    "validation",
+    "typescript"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "docs",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "types": "tsc -p tsconfig.tests.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "test:browser": "playwright test",
+    "test:browser:serve": "vite --config vite.browser.config.mts",
+    "types:demo": "tsc -p demo/tsconfig.json --noEmit",
+    "demo:dev": "vite --config vite.demo.config.mts",
+    "demo:build": "vite build --config vite.demo.config.mts && node scripts/inline-demo.mjs",
+    "demo:preview": "vite preview --config vite.demo.config.mts",
+    "test:demo": "npm run types:demo && npm run demo:build && playwright test --config playwright.demo.config.ts",
+    "test:package": "node scripts/test-package.mjs",
+    "check": "npm run types && npm run types:demo && npm test && npm run build && npm run test:browser && npm run test:package",
+    "prepublishOnly": "npm run check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marjarosz/mvvm-dom.git"
+  },
+  "devDependencies": {
+    "@babel/core": "^8.1.0",
+    "@babel/plugin-proposal-decorators": "^8.0.2",
+    "@playwright/test": "^1.65.1",
+    "@rolldown/plugin-babel": "^0.3.1",
+    "@types/node": "^26.6.6",
+    "@vitest/coverage-v8": "^5.1.0",
+    "jsdom": "^31.0.1",
+    "typescript": "7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}

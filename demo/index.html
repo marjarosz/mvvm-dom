@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>mvvm-dom - Small library. Real possibilities.</title>
+    <meta name="description" content="Explore mvvm-dom: a dependency-free TypeScript MVVM library. Try reactive forms, collections, commands and validation in a live project workspace.">
+    <meta name="theme-color" content="#263dda">
+    <meta property="og:title" content="mvvm-dom - Small library. Real possibilities.">
+    <meta property="og:description" content="A live playground for reactive models, DOM bindings, commands and validation. No framework required.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23263dda'/%3E%3Cpath d='M9 29V12l11 11 11-11v17' fill='none' stroke='white' stroke-width='4'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./showcase.css">
+</head>
+<body>
+<a class="skip-link" href="#project">Skip to playground</a>
+<template id="shellTpl"><header class="topbar"><a class="brand" href="#"><strong>mvvm<span>-dom</span></strong><span class="version">v1.0.0</span></a><nav class="header-links" aria-label="Resources"><a href="https://github.com/marjarosz/mvvm-dom/blob/main/docs/guide.en.md">Documentation ↗</a><a href="https://github.com/marjarosz/mvvm-dom">GitHub ↗</a><button class="theme-button" data-command="{click: theme}" data-bind="{text: themeLabel}"></button><button class="menu-button" data-command="{click: menu}" data-bind="{attribute: menuExpanded, attributeName: aria-expanded}" aria-controls="section-nav">Examples ☰</button></nav></header><div class="install-bar"><code>npm install mvvm-dom</code><button class="text-button" data-command="{click: copy}" data-bind="{text: copyLabel}" aria-live="polite"></button></div></template><div id="shellHost"></div>
+<div class="hero"><div class="hero-content"><p class="eyebrow"><span class="pulse-dot"></span> TYPESCRIPT · NATIVE DOM · ZERO RUNTIME DEPENDENCIES</p><h1>Small library.<br><span>Real possibilities.</span></h1><p class="hero-description">Your models, connected to your interface.<br>Build reactive experiences with plain HTML and TypeScript.</p><div class="hero-actions"><a class="primary button-link" href="#project">Explore the playground <span>↗</span></a><a class="quiet-link" href="#getting-started">Start building →</a></div></div><div class="hero-code" aria-label="Example of reactive data binding"><div class="code-title"><span class="code-dots">● ● ●</span> A LITTLE CODE. A LIVE CONNECTION.<span>TS + HTML</span></div><pre><span class="syntax-muted">// Your model</span>
+<span class="syntax-purple">class</span> TaskModel <span class="syntax-purple">extends</span> ViewModel {
+  <span class="syntax-blue">@propertyChange()</span>
+  <span class="syntax-purple">accessor</span> title = <span class="syntax-green">'Make something great'</span>;
+}</pre><div class="connection-line"><span>MODEL</span><span>↕ two-way binding</span><span>VIEW</span></div><pre><span class="syntax-muted">&lt;!-- Your interface --&gt;</span>
+&lt;<span class="syntax-blue">input</span> data-bind=<span class="syntax-green">"{value: title,
+  mode: twoWay, triggerType: input}"</span>&gt;</pre><div class="code-foot"><span class="pulse-dot"></span> No virtual DOM. No template compiler.</div></div></div>
+<div class="principles"><span><b>01</b> Plain HTML & TypeScript</span><span><b>02</b> Direct DOM updates</span><span><b>03</b> Explicit lifecycle</span><span><b>04</b> Yours to extend</span></div>
+<div class="page-layout"><aside class="sidebar"><nav id="section-nav" aria-label="Examples"><p class="eyebrow">THE PLAYGROUND</p><a href="#project"><span>01</span>Live workspace</a><a href="#forms"><span>02</span>Form controls</a><a href="#text"><span>03</span>Text & views</a><a href="#collections"><span>04</span>Collections</a><a href="#commands"><span>05</span>Commands</a><a href="#validation"><span>06</span>Validation</a><a href="#converters"><span>07</span>Converters</a><a href="#extensions"><span>08</span>Custom bindings</a><a href="#drag"><span>09</span>Drag & drop</a><a href="#lifecycle"><span>10</span>Lifecycle</a><a href="#lab"><span>11</span>Binding & event lab</a><a href="#getting-started"><span>12</span>Get started</a><div class="sidebar-note">Built with the library<br>you're exploring.<br><a href="https://github.com/marjarosz/mvvm-dom/tree/main/demo">Browse demo source ↗</a></div></nav></aside>
+
+<main>
+    <section id="project" data-example="project" data-source="projectDemo" class="project-section"><div class="section-heading"><div><span class="eyebrow">LESS THEORY. MORE TRYING.</span><h2>A workspace that works.</h2></div><button class="reset-button" data-reset="project">↻ Reset demo</button></div><p class="section-description">A small project manager, powered entirely by mvvm-dom. Go ahead - make it yours.</p><template id="projectTpl"></template><div id="projectHost"></div></section><div class="catalog-heading"><span class="eyebrow">UNDER THE HOOD</span><h2>Explore every connection.</h2><p>Focused, hands-on examples. Change a value, see the result, read the code.</p></div>
+
+    <!-- ============================ 1. FORM ============================ -->
+    <section class="card" id="forms" data-example="forms" data-source="formDemo"><div class="section-heading"><div><span class="eyebrow">EXAMPLE 01</span><h2>Form controls</h2></div><button class="reset-button" data-reset="forms" aria-label="Reset Form controls">↻ Reset</button></div><p class="section-description">Make a change. Watch the model follow. Explore native inputs with two-way binding.</p>
+        <p class="hint">
+            <code>value + triggerType</code>, <code>checked</code>, <code>readonly</code>,
+            <code>radio</code>, <code>options</code>, <code>selectedValues</code>,
+            <code>attribute</code>, <code>submit</code>
+        </p>
+        <template id="formTpl">
+            <div class="grid2">
+                <label>
+                    name (<code>value, triggerType: input</code>)
+                    <input data-bind="{value: name, mode: twoWay, triggerType: input}, {readonly: isReadonly}">
+                </label>
+                <label>
+                    <input type="checkbox" data-bind="{checked: isReadonly, mode: twoWay}">
+                    make the field above <code>readonly</code>
+                </label>
+                <fieldset>
+                    <legend data-bind="{interpolate: plan}">plan (<code>radio</code>) - selected: {{plan}}</legend>
+                    <label><input type="radio" name="plan" value="basic" data-bind="{radio: plan, mode: twoWay}"> basic</label>
+                    <label><input type="radio" name="plan" value="pro" data-bind="{radio: plan, mode: twoWay}"> pro</label>
+                </fieldset>
+                <label>
+                    languages (<code>options twoWay</code>)
+                    <select data-bind="{options: languages, mode: twoWay}"
+                            data-command="{change: langChanged}"></select>
+                    <span data-bind="{text: langInfo}"></span>
+                </label>
+                <label>
+                    frameworks (<code>multiple + selectedValues</code>)
+                    <span data-bind="{interpolate: chosenFrameworkText}"> - chosen: {{chosenFrameworkText}}</span>
+                    <select class="framework-select" multiple size="4" aria-describedby="framework-select-help" data-bind="{options: frameworks}, {selectedValues: chosenFrameworks, mode: twoWay}"
+                            data-command="{change: syncFrameworks}"></select>
+                    <small id="framework-select-help" class="select-help">Choose several with Ctrl / ⌘ + click, or Shift + arrow keys.</small>
+                </label>
+                <div class="row">
+                    <img data-bind="{attribute: imageSrc, attributeName: src}" alt="bound via attribute">
+                    <button data-command="{click: nextImage}">swap image (<code>attribute: src</code>)</button>
+                </div>
+                <form action="/unexpected" class="row" data-command="{submit: submitForm}">
+                    <button type="submit">submit form (<code>submit</code> - no reload)</button>
+                    <span data-bind="{text: submitInfo}"></span>
+                </form>
+            </div>
+        </template>
+        <div id="formHost"></div>
+    </section>
+
+    <!-- ============================ 2. TEXT & STRUCTURAL ============================ -->
+    <section class="card" id="text" data-example="text" data-source="textDemo"><div class="section-heading"><div><span class="eyebrow">EXAMPLE 02</span><h2>Text & conditional views</h2></div><button class="reset-button" data-reset="text" aria-label="Reset Text & conditional views">↻ Reset</button></div><p class="section-description">One value, multiple representations. Toggle a branch to mount and dispose its view.</p>
+        <p class="hint">
+            <code>text</code>, <code>interpolate</code>, <code>innerHTML</code> (string + sub-View + <code>ready</code>),
+            <code>if</code>, <code>display</code>, <code>visibility</code>, <code>style</code>
+        </p>
+        <template id="textTpl">
+            <label>
+                type something (<code>text</code> + <code>interpolate</code> stay in sync, HTML is escaped)
+                <input data-bind="{value: userInput, mode: twoWay, triggerType: input}">
+            </label>
+            <p>You typed: <span data-bind="{text: userInput}"></span></p>
+            <p data-bind="{interpolate: userInput}">interpolated token: {{userInput}} and again: {{userInput}}</p>
+            <p data-bind="{interpolate: who}">Hello {{who}}!</p>
+            <p>innerHTML string: <span data-bind="{innerHTML: trustedHtml}"></span></p>
+            <div class="subview" data-bind="{innerHTML: subView}"></div>
+            <p>
+                <button data-command="{click: toggleDetails}">toggle <code>if</code> branch</button>
+                <span data-bind="{if: showDetails}"><code data-bind="{text: detailsText}"></code></span>
+            </p>
+            <p>
+                <button data-command="{click: togglePanel}">toggle <code>display</code>/<code>visibility</code></button>
+                <span class="panel" data-bind="{display: panelVisible, trueVal: inline-block, falseVal: none}, {style: opacityVal, styleName: opacity}">
+                    hidden by <code>display</code>, styled by <code>style</code> (opacity <span data-bind="{text: opacityText}"></span>)
+                </span>
+            </p>
+        </template>
+        <div id="textHost"></div>
+
+        <template id="readyTpl">
+            <p class="chip">
+                <span data-bind="{text: readyInfo}"></span>
+                <span class="muted" data-command="{ready: onReady}">(ready event wired via data-command)</span>
+            </p>
+        </template>
+    </section>
+
+    <!-- ============================ 3. COLLECTIONS ============================ -->
+    <section class="card" id="collections" data-example="collections" data-source="collectionsDemo"><div class="section-heading"><div><span class="eyebrow">EXAMPLE 03</span><h2>Collections that stay in sync</h2></div><button class="reset-button" data-reset="collections" aria-label="Reset Collections that stay in sync">↻ Reset</button></div><p class="section-description">Add, remove and reorder items. Update nested properties without rebuilding the page.</p>
+        <p class="hint">
+            <code>CollectionObserver</code> with nested paths, row commands with
+            <code>parameter: object.name</code>, <code>ArrayObserver&lt;HTMLElement&gt;</code> +
+            <code>innerHTML</code> reconciliation
+        </p>
+        <template id="tasksTpl">
+            <p class="row">
+                <button data-command="{click: addTask}">push()</button>
+                <button data-command="{click: removeLast}">pop()</button>
+                <button data-command="{click: shuffle}">reverse()</button>
+                <button data-command="{click: cycleStatus}">edit row[0].details.status</button>
+                <span data-bind="{text: lastAction}"></span>
+            </p>
+            <ul class="rows">
+                <li class="rowline" data-bind="{collection: tasks}"
+                    ><button class="row-select" data-command="{click: selectRow, parameter: object.name}">
+                    <span>{{object.name}}</span>
+                    <span class="chip">{{object.details.status}}</span>
+                    <span class="muted">{{parent.projectLabel}} ↗</span></button>
+                </li>
+            </ul>
+        </template>
+        <div id="tasksHost"></div>
+        <template id="tagsTpl">
+            <p class="row">
+                <button data-command="{click: addTag}">push()</button>
+                <button data-command="{click: removeTag}">splice(0,1)</button>
+                <span data-bind="{text: tagInfo}"></span>
+            </p>
+            <div class="taglist" data-bind="{innerHTML: tagEls}"></div>
+        </template>
+        <div id="tagsHost"></div>
+        <div class="view-panels-intro"><span class="eyebrow">COLLECTION OF VIEWS</span><h3>Your own little workspace</h3><p>The list above creates rows from data with <code>CollectionObserver</code>. Here, <code>ArrayObserver&lt;View&gt;</code> holds independent views. Reorder them and their state stays intact.</p></div>
+        <template id="workPanelsTpl">
+            <div class="row panel-toolbar"><button class="primary" data-command="{click: addPanel}">Add panel</button><button data-command="{click: reversePanels}">Reverse panels</button><button data-command="{click: clearPanels}">Remove all panels</button></div>
+            <p class="panel-lifecycle" data-bind="{interpolate: live}, {interpolate: disposedCount}"><strong>{{live}}</strong> live views <span aria-hidden="true">·</span> <strong>{{disposedCount}}</strong> models disposed</p>
+            <div class="work-panels" data-bind="{innerHTML: panels}"></div>
+            <p class="empty-state" data-bind="{if: empty}">Your workspace is clear. Add a panel to start again.</p>
+            <p class="panel-action" role="status" data-bind="{text: action}"></p>
+        </template>
+        <template id="workPanelTpl">
+            <article class="work-panel">
+                <header><h4 data-bind="{text: title}"></h4><span class="local-badge">Independent model</span></header>
+                <label>Panel note<input placeholder="Write something to keep…" data-bind="{value: note, mode: twoWay, triggerType: input}"></label>
+                <div class="panel-counter"><span>Local counter <strong data-bind="{text: count}"></strong></span><button data-command="{click: increment}">Increment</button></div>
+                <button class="text-button danger" data-command="{click: remove}">Remove panel</button>
+            </article>
+        </template>
+        <div id="workPanelsHost"></div>
+    </section>
+
+    <!-- ============================ 4. COMMANDS ============================ -->
+    <section class="card" id="commands" data-example="commands" data-source="commandsDemo"><div class="section-heading"><div><span class="eyebrow">EXAMPLE 04</span><h2>Actions with intent</h2></div><button class="reset-button" data-reset="commands" aria-label="Reset Actions with intent">↻ Reset</button></div><p class="section-description">Try keyboard shortcuts, execution guards and asynchronous commands.</p>
+        <p class="hint">
+            <code>click</code>, <code>key</code>, <code>mouseInOut</code>, <code>submit</code>,
+            <code>canExecute</code>, <code>blockWhileExecuting</code> (the library disables the button itself)
+        </p>
+        <template id="cmdsTpl">
+            <p class="row">
+                <button data-command="{click: inc}">click me</button>
+                <span data-bind="{interpolate: clicks}">clicks: {{clicks}}</span>
+            </p>
+            <label>
+                shortcut (<code>key</code>) - try Ctrl+S or Enter
+                <input data-command="{key: saveKey, keys: Ctrl+S | Enter}">
+            </label>
+            <p data-bind="{text: lastKey}"></p>
+            <div class="hoverbox" data-command="{mouseInOut: hover, trigger: both}">
+                hover me (<code>mouseInOut, trigger: both</code>) - <span data-bind="{text: hoverState}"></span>
+            </div>
+            <form action="/unexpected" class="row" data-command="{submit: submitNote}">
+                <button type="submit">submit</button>
+                <span data-bind="{text: submitNote}"></span>
+            </form>
+            <p class="row">
+                <button data-command="{click: runAsync}">async command (1.2s)</button>
+                <span class="chip" data-bind="{class: busyClass}, {interpolate: asyncInfo}">{{asyncInfo}}</span>
+            </p>
+            <p class="row">
+                <button data-command="{click: toggleGuard}">toggle guard</button>
+                <button data-command="{click: ping}">guarded ping</button>
+                <span data-bind="{interpolate: pingsText}">{{pingsText}}</span>
+            </p>
+        </template>
+        <div id="cmdsHost"></div>
+    </section>
+
+    <!-- ============================ 5. VALIDATION ============================ -->
+    <section class="card" id="validation" data-example="validation" data-source="validationDemo"><div class="section-heading"><div><span class="eyebrow">EXAMPLE 05</span><h2>Helpful feedback, built in</h2></div><button class="reset-button" data-reset="validation" aria-label="Reset Helpful feedback, built in">↻ Reset</button></div><p class="section-description">Correct the fields and submit. Validation state drives both messages and presentation.</p>
+        <p class="hint">
+            <code>@validate</code> rules, <code>data-validate-error</code> with
+            <code>class</code> and <code>message</code>, whole-model <code>validate()</code>
+        </p>
+        <template id="validTpl">
+            <div class="grid2">
+                <label>
+                    login
+                    <input data-bind="{value: login, mode: twoWay, triggerType: input}"
+                           data-validate-error="{class: login, errorClass: invalid, noErrorClass: ok}">
+                    <small data-validate-error="{message: login, defaultMessage: Login required}"></small>
+                </label>
+                <label>
+                    email
+                    <input data-bind="{value: email, mode: twoWay, triggerType: input}"
+                           data-validate-error="{class: email, errorClass: invalid, noErrorClass: ok}">
+                    <small data-validate-error="{message: email, defaultMessage: Invalid email}"></small>
+                </label>
+                <label>
+                    password
+                    <input type="password" data-bind="{value: password, mode: twoWay, triggerType: input}"
+                           data-validate-error="{class: password, errorClass: invalid, noErrorClass: ok}">
+                    <small data-validate-error="{message: password, defaultMessage: Too short}"></small>
+                </label>
+                <p class="row">
+                    <button data-command="{click: submitValidated}">validate() whole model</button>
+                    <button data-command="{click: resetValidation}">reset validation</button>
+                    <span data-bind="{text: formState}"></span>
+                </p>
+            </div>
+        </template>
+        <div id="validHost"></div>
+    </section>
+
+    <!-- ============================ 6. CONVERTERS ============================ -->
+    <section class="card" id="converters" data-example="converters" data-source="convertersDemo"><div class="section-heading"><div><span class="eyebrow">EXAMPLE 06</span><h2>One model. Different representations.</h2></div><button class="reset-button" data-reset="converters" aria-label="Reset One model. Different representations.">↻ Reset</button></div><p class="section-description">Translate model values into presentation values - and back again.</p>
+        <p class="hint">
+            <code>registerConverter</code> + <code>@convert</code>: one-way to a CSS class,
+            two-way °F↔°C on the same property
+        </p>
+        <template id="convTpl">
+            <p class="row">
+                <span class="chip" data-bind="{class: status}">status chip</span>
+                raw model value: <code data-bind="{text: statusRaw}"></code>
+                <button data-command="{click: cycleStatus}">cycle</button>
+            </p>
+            <p class="row">
+                temperature (<code>convertBack</code>) - the input shows °F, the model stores °C
+                <input type="number" data-bind="{value: temperatureC, mode: twoWay, triggerType: input}"
+                       data-command="{change: syncTemp}">
+                <span data-bind="{text: tempNote}"></span>
+            </p>
+        </template>
+        <div id="convHost"></div>
+    </section>
+
+    <!-- ============================ 7. CUSTOM BINDINGS ============================ -->
+    <section class="card" id="extensions" data-example="extensions" data-source="customDemo"><div class="section-heading"><div><span class="eyebrow">EXAMPLE 07</span><h2>Make the library your own</h2></div><button class="reset-button" data-reset="extensions" aria-label="Reset Make the library your own">↻ Reset</button></div><p class="section-description">Register a property binding and a structural binding, then use them directly in HTML.</p>
+        <p class="hint">
+            <code>BindingFactory.registerBinding</code> (<code>ariaLabel</code>) and
+            <code>registerStructuralBinding</code> (<code>whenReady</code>) - used from plain HTML
+        </p>
+        <template id="customTpl">
+            <p class="row">
+                <button data-bind="{ariaLabel: accessibleName}" data-command="{click: rename}">🖼 icon button</button>
+                <span>its <code>aria-label</code>: <code data-bind="{text: accessibleName}"></code></span>
+            </p>
+            <p class="row">
+                status: <code data-bind="{text: status}"></code>
+                <button data-command="{click: makeReady}">toggle whenReady</button>
+            </p>
+            <div class="branch" data-bind="{whenReady: status}">
+                <span data-bind="{text: branchTitle}"></span>
+            </div>
+        </template>
+        <div id="customHost"></div>
+    </section>
+
+    <!-- ============================ 9. DRAG AND DROP ============================ -->
+    <section class="card" id="drag" data-example="drag" data-source="dragDemo"><div class="section-heading"><div><span class="eyebrow">EXAMPLE 09</span><h2>Move things around</h2></div><button class="reset-button" data-reset="drag" aria-label="Reset Move things around">↻ Reset</button></div><p class="section-description">Drag a chip into the drop zone, or use its Add button with touch or keyboard.</p>
+        <p class="hint">
+            <code>draggable</code> is an <code>attribute</code> binding from the model, the zone uses the
+            <code>dragover</code> / <code>dragleave</code> / <code>drop</code> trio - the library calls
+            <code>preventDefault()</code> and sets <code>dropEffect: copy</code> so the drop can happen
+        </p>
+        <template id="dragTpl">
+            <p class="row">
+                <button data-command="{click: toggleDraggable}">toggle draggable</button>
+                <button data-command="{click: clearDrops}">clear received</button>
+                <span class="chip" data-bind="{interpolate: dragAttr}">draggable="{{dragAttr}}"</span>
+            </p>
+            <p class="row">
+                <span class="chip drag-src" data-draglabel="chip one"
+                      data-bind="{attribute: dragAttr, attributeName: draggable}">chip one</span>
+                <span class="chip drag-src" data-draglabel="chip two"
+                      data-bind="{attribute: dragAttr, attributeName: draggable}">chip two</span>
+                <button data-command="{click: addAccessible, parameter: chipOne}">Add chip one</button><button data-command="{click: addAccessible, parameter: chipTwo}">Add chip two</button><span class="muted">or select some text and drag it into the zone</span>
+            </p>
+            <div class="dropzone" data-bind="{class: dropClass}"
+                 data-command="{dragover: dragOver}, {dragleave: dragLeave}, {drop: dropped}">
+                <p class="muted" data-bind="{text: dropNote}"></p>
+                <div class="taglist">
+                    <span class="chip" data-bind="{collection: received}">{{object.label}}</span>
+                </div>
+            </div>
+        </template>
+        <div id="dragHost"></div>
+    </section>
+
+    <!-- ============================ 10. LIFECYCLE ============================ -->
+    <section class="card" id="lifecycle" data-example="lifecycle" data-source="lifecycleDemo"><div class="section-heading"><div><span class="eyebrow">EXAMPLE 10</span><h2>Explicit ownership. Predictable cleanup.</h2></div><button class="reset-button" data-reset="lifecycle" aria-label="Reset Explicit ownership. Predictable cleanup.">↻ Reset</button></div><p class="section-description">Two views share one model. Detach, reattach or dispose them and observe what survives.</p>
+        <p class="hint"><code>ViewFactory</code>, <code>ownsDataContext: false</code>, <code>detach()</code>, <code>dispose()</code></p>
+        <template id="lifeTpl">
+            <p class="row">
+                <span class="chip" data-bind="{interpolate: count}">live counter: {{count}}</span>
+                <button data-command="{click: bump}">bump</button>
+            </p>
+        </template>
+        <template id="lifeCtlTpl">
+            <p class="row">
+                <button data-command="{click: mountView}">Mount views</button><button data-command="{click: detachView}">Detach</button><button data-command="{click: reattachView}">Reattach</button><button data-command="{click: disposeView}">Dispose views</button><span role="status" data-bind="{interpolate: stateNote}">{{stateNote}}</span>
+            </p>
+        </template>
+        <div id="lifeHost"></div>
+        <div id="lifeControls"></div>
+    </section>
+<section class="card" id="lab" data-example="lab" data-source="labDemo"><div class="section-heading"><div><span class="eyebrow">EXAMPLE 11</span><h2>The binding & event lab.</h2></div><button class="reset-button" data-reset="lab">↻ Reset</button></div><p class="section-description">Explore the finer details: data flow, property aliases, resize observation and native events.</p><template id="labTpl"></template><div id="labHost"></div></section>
+<section class="getting-started" id="getting-started"><span class="eyebrow">YOUR TURN</span><h2>From a property<br>to a possibility.</h2><p>Install the package. Create a model. Connect your first view.</p><div class="start-grid"><div><span class="step-number">01</span><h3>Install</h3><pre><code>npm install mvvm-dom</code></pre><p>ES modules and TypeScript declarations included.</p><span class="step-number">02</span><h3>Write a template</h3><pre><code>&lt;template id="hello"&gt;
+  &lt;input data-bind="{value: name,
+    mode: twoWay, triggerType: input}"&gt;
+&lt;/template&gt;</code></pre></div><div><span class="step-number">03</span><h3>Connect your model</h3><pre><code>import { View, ViewModel } from 'mvvm-dom';
+
+const model = new ViewModel();
+model.registerProperty('name', 'Hello!');
+const template = document.getElementById('hello');
+if (!(template instanceof HTMLTemplateElement)) {
+  throw new Error('Missing template');
+}
+const view = new View(template, model);
+document.body.append(...view.viewNodeList);
+
+// When you're done:
+// view.dispose();</code></pre></div></div><a class="primary button-link" href="https://github.com/marjarosz/mvvm-dom/blob/main/docs/guide.en.md">Read the full guide ↗</a><p class="start-note">Using decorators? Use standard TypeScript decorators, with experimentalDecorators disabled.</p></section></main></div>
+
+
+
+<footer class="foot"><a class="brand" href="#"><strong>mvvm-dom</strong></a><span>Small by design. Open by default.</span><div><a href="https://github.com/marjarosz/mvvm-dom/blob/main/LICENSE">MIT License</a><a href="https://github.com/marjarosz/mvvm-dom">GitHub ↗</a></div></footer>
+
+<script type="module" src="./main.ts"></script>
+</body>
+</html>

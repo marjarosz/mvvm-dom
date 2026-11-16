@@ -1,0 +1,61 @@
+<div class="workspace">
+  <div class="workspace-top"><div><span class="workspace-icon">M</span><strong>Launch workspace</strong><span class="workspace-slash">/</span><span class="muted">Website release</span></div><span class="local-badge"><i></i> Local demo</span></div>
+  <div class="project-overview"><div><span class="eyebrow">YOUR NEXT RELEASE</span><h3>A little structure.<br>A lot of possibility.</h3><p>Search, edit, and ship a task. Everything stays in sync.</p></div><div class="project-stats"><div><strong data-bind="{text: total}"></strong><span>Total tasks</span></div><div><strong data-bind="{text: active}"></strong><span>In progress</span></div><div><strong data-bind="{text: completed}"></strong><span>Completed</span></div></div></div>
+  <div class="progress-caption"><span>Release progress</span><strong data-bind="{text: progress}"></strong></div><div class="progress-track"><span data-bind="{style: progress, styleName: width}"></span></div>
+  <div class="workspace-tabs" data-bind="{demoTabs: activeTab, mode: twoWay}">
+    <div class="tab-bar" role="tablist" aria-label="Workspace sections">
+      <button id="tab-tasks" role="tab" type="button" data-tab="tasks" aria-controls="panel-tasks">Tasks <span class="tab-count" data-bind="{text: total}"></span></button>
+      <button id="tab-overview" role="tab" type="button" data-tab="overview" aria-controls="panel-overview">Overview</button>
+      <button id="tab-activity" role="tab" type="button" data-tab="activity" aria-controls="panel-activity">Activity</button>
+    </div>
+    <div class="task-panel" id="panel-tasks" role="tabpanel" aria-labelledby="tab-tasks" tabindex="0">
+      <div class="panel-heading"><div><h4>Project tasks</h4><p class="panel-subtitle">A clear view of what's next.</p></div><button class="primary small" data-new-task data-command="{click: newTask}">+ New task</button></div>
+      <div class="task-filters"><label><span class="sr-only">Search tasks</span><input type="search" placeholder="Search tasks…" data-bind="{value: query, mode: twoWay, triggerType: input}" data-command="{input: filterTasks}"></label><label><span class="sr-only">Filter status</span><select aria-label="Filter status" data-bind="{options: filters, mode: twoWay}" data-command="{change: filterTasks}"></select></label></div>
+      <p id="task-reorder-help" class="reorder-help">Drag the grip to reorder. Or use the arrow buttons; on the grip, press Alt + ↑ / ↓.</p>
+      <div class="task-list" data-reorder-list role="list" aria-label="Project tasks">
+        <div class="task-item" role="listitem" data-bind="{collection: visibleTasks}, {attribute: object.id, attributeName: data-task-id}, {attribute: parent.busy, attributeName: data-reorder-disabled}" data-command="{demoTaskReorder: reorderTask, parameter: object.id}">
+          <button type="button" class="task-grip" draggable="true" data-reorder-handle aria-label="Reorder task" aria-describedby="task-reorder-help" title="Drag to reorder; Alt + Up / Down" data-bind="{disabled: parent.busy}"><span aria-hidden="true">⠿</span></button>
+          <button type="button" class="task-open" data-command="{click: selectTask, parameter: object.id}"><span class="task-indicator" data-bind="{attribute: object.status, attributeName: data-status}"></span><span class="task-text"><strong>{{object.name}}</strong><small>{{object.category}} <span aria-hidden="true">·</span> {{object.priority}} priority</small></span><span class="status-badge" data-bind="{attribute: object.status, attributeName: data-status}">{{object.status}}</span><span class="task-arrow" aria-hidden="true">↗</span></button>
+          <span class="task-move-buttons"><button type="button" data-reorder-step="up" aria-label="Move task up" title="Move up" data-bind="{disabled: parent.busy}">↑</button><button type="button" data-reorder-step="down" aria-label="Move task down" title="Move down" data-bind="{disabled: parent.busy}">↓</button></span>
+        </div>
+      </div>
+      <div class="empty-state" data-bind="{if: empty}"><strong>No tasks here yet.</strong><p>Try a different search or add something new.</p></div>
+      <div class="list-footer"><span data-bind="{text: resultNote}"></span><button class="text-button" data-command="{click: reverseTasks}">Reverse order ↕</button></div>
+    </div>
+    <div class="overview-panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="0" hidden>
+      <div class="panel-heading"><div><h4>Your release at a glance</h4><p class="panel-subtitle">Live totals, connected to the same model.</p></div></div>
+      <div class="overview-grid">
+        <div class="overview-stat"><span class="overview-icon">○</span><strong data-bind="{text: pending}"></strong><span>Ready to start</span><small>Tasks waiting for their next step</small></div>
+        <div class="overview-stat"><span class="overview-icon">◐</span><strong data-bind="{text: active}"></strong><span>In progress</span><small>Ideas becoming something real</small></div>
+        <div class="overview-stat"><span class="overview-icon">✓</span><strong data-bind="{text: completed}"></strong><span>Completed</span><small>One step closer to release</small></div>
+      </div>
+      <div class="overview-note"><div><strong>Focus on what matters.</strong><p data-bind="{interpolate: highPriority}">{{highPriority}} high-priority tasks in this workspace.</p></div><span class="overview-progress" data-bind="{text: progress}"></span></div>
+    </div>
+    <div class="activity-panel" id="panel-activity" role="tabpanel" aria-labelledby="tab-activity" tabindex="0" hidden>
+      <div class="panel-heading"><div><h4>The story so far</h4><p class="panel-subtitle">Your changes, in order. Latest first.</p></div><span class="local-badge">This session</span></div>
+      <ol class="activity-list"><li data-bind="{collection: activity}"><span class="activity-dot"></span><div><strong>{{object.label}}</strong><p>{{object.detail}}</p></div></li></ol>
+    </div>
+  </div>
+  <p class="workspace-notice" role="status" data-bind="{text: notice}"></p>
+  <dialog class="task-modal" aria-labelledby="task-dialog-title" data-bind="{demoDialog: editorOpen, mode: twoWay}, {attribute: busy, attributeName: data-busy}">
+    <form class="task-editor" data-command="{submit: saveTask}">
+      <div class="modal-heading"><div><span class="eyebrow">MAKE ROOM FOR YOUR NEXT IDEA</span><h3 id="task-dialog-title" data-bind="{text: editorTitle}"></h3></div><button type="button" class="modal-close" aria-label="Close task editor" data-command="{click: closeEditor}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <p class="modal-intro">A few details. A clear next step.</p>
+      <fieldset data-bind="{disabled: busy}"><legend class="sr-only">Task details</legend>
+        <label>Task name<input autofocus placeholder="What would you like to accomplish?" data-bind="{value: title, mode: twoWay, triggerType: input}" data-validate-error="{class: title, errorClass: invalid, noErrorClass: valid}" aria-describedby="task-name-error"></label>
+        <small id="task-name-error" class="field-error" aria-live="polite" data-validate-error="{message: title}"></small>
+        <div class="modal-fields"><label>Category<input data-bind="{value: category, mode: twoWay, triggerType: input}"></label>
+        <label>Status<select aria-label="Status" data-bind="{options: statuses, mode: twoWay}" data-command="{change: changeStatus}"></select></label></div>
+        <fieldset class="priority-options"><legend>Priority</legend><label><input type="radio" name="task-priority" value="Normal" data-bind="{radio: priority, mode: twoWay}"> Normal</label><label><input type="radio" name="task-priority" value="High" data-bind="{radio: priority, mode: twoWay}"> High</label></fieldset>
+      </fieldset>
+      <p class="save-note" role="status" data-bind="{text: saveNote}"></p>
+      <div class="modal-actions"><button class="danger text-button" type="button" data-command="{click: requestDelete}">Delete task</button><span></span><button type="button" data-command="{click: closeEditor}">Cancel</button><button class="primary" type="submit" data-bind="{text: saveLabel}, {disabled: busy}"></button></div>
+    </form>
+  </dialog>
+  <dialog class="confirm-modal" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description" data-bind="{demoDialog: deleteOpen, mode: twoWay}">
+    <span class="delete-symbol" aria-hidden="true">!</span><h3 id="delete-dialog-title">Delete this task?</h3>
+    <p id="delete-dialog-description">This removes the task from your demo workspace. This action cannot be undone.</p>
+    <div class="confirm-actions"><button autofocus data-command="{click: cancelDelete}">Keep task</button><button class="destructive" data-command="{click: removeTask}">Delete permanently</button></div>
+  </dialog>
+  <div class="workspace-caption"><span class="pulse-dot"></span> Real DOM. Reactive properties. No render loop.<span class="caption-tech">View + ViewModel + CollectionObserver</span></div>
+</div>
