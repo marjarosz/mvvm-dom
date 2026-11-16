@@ -2,7 +2,9 @@
 
 All notable changes to this project are documented in this file.
 
-## Unreleased
+## 1.0.0 - 2026-11-11
+
+First stable release.
 
 - Public extension registries for command event bindings
   (`CommandBindingFactory.registerCommandBinding`) and validation error
@@ -11,11 +13,6 @@ All notable changes to this project are documented in this file.
   `ValidationErrorBindingCreate`), name collision checks mirroring
   `BindingFactory`, and Map-backed registries so any name (including
   `constructor`/`toString`/`__proto__`) is safe to register and resolve
-
-## 1.0.0 - 2026-11-11
-
-First stable release.
-
 - Reactive model properties with dependency-property semantics
 - Declarative `data-bind` bindings (value, text, innerHTML, if, class, style,
   checked, radio, options, visibility, sizing, scroll, interpolation)
