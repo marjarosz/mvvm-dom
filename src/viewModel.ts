@@ -197,7 +197,11 @@ export interface IViewModel extends IBindingContext{
      *
      * @param name Name of the property.
      * @param value Initial value of the property.
-     * @param changeCallback Optional callback invoked when the value changes.
+     * @param changeCallback Optional callback invoked after validation on writes
+     *   with callbackExecute = true, not during registration. setPropertyValue
+     *   defaults to true; setPropertyValueAndNotify defaults to false. View
+     *   writes enable it but skip Object.is-equal values; explicit writes do not.
+     *   Plain decorated accessor assignment does not invoke it.
      */
     registerProperty(name: string, value?: unknown, changeCallback?: (value: unknown)=>void): void
 
@@ -635,7 +639,11 @@ export class ViewModel implements IViewModel, IBindingContext{
      *
      * @param name Name of the property.
      * @param value Initial value of the property.
-     * @param changeCallback Optional callback invoked when the value changes.
+     * @param changeCallback Optional callback invoked after validation on writes
+     *   with callbackExecute = true, not during registration. setPropertyValue
+     *   defaults to true; setPropertyValueAndNotify defaults to false. View
+     *   writes enable it but skip Object.is-equal values; explicit writes do not.
+     *   Plain decorated accessor assignment does not invoke it.
      */
     public registerProperty(name: string, value?: unknown, changeCallback?: (value: unknown)=>void){
 

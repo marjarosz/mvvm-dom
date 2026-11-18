@@ -771,7 +771,12 @@ function validate(input: ValidatorInput, callback?: string): ...
 ```
 
 - `input` - a validator instance, a validator factory or an array of these.
-- `callback` - an optional method name invoked on a property value change.
+- `callback` - an optional method name bound to the ViewModel instance.
+  Runs after validation on writes with `callbackExecute = true`:
+  `setPropertyValue` (by default), `setPropertyValueAndNotify` (explicitly)
+  and `setPropertyValueFromView` for changed values.
+  Plain accessor assignment and initialization do not invoke the callback.
+  View writes skip `Object.is`-equal values; explicit write APIs do not.
 - @throws {Error} when applied to anything other than a named accessor.
 
 ### `propertyChange`
@@ -784,8 +789,12 @@ go through the registered property store, and a write fires a
 function propertyChange(callback?: string): ...
 ```
 
-- `callback` - an optional method name invoked on a property value change
-  (bound to the ViewModel instance).
+- `callback` - an optional method name bound to the ViewModel instance.
+  Runs after validation on writes with `callbackExecute = true`:
+  `setPropertyValue` (by default), `setPropertyValueAndNotify` (explicitly)
+  and `setPropertyValueFromView` for changed values.
+  Plain accessor assignment and initialization do not invoke the callback.
+  View writes skip `Object.is`-equal values; explicit write APIs do not.
 - @throws {Error} when applied to anything other than a named accessor.
 - @throws {TypeError} when the resolved callback is not a function.
 
@@ -799,8 +808,12 @@ function propertyAlias(propertyName: string, callback?: string): ...
 ```
 
 - `propertyName` - the property name exposed to the ViewModel and bindings.
-- `callback` - an optional method name invoked on a property value change
-  (bound to the ViewModel instance).
+- `callback` - an optional method name bound to the ViewModel instance.
+  Runs after validation on writes with `callbackExecute = true`:
+  `setPropertyValue` (by default), `setPropertyValueAndNotify` (explicitly)
+  and `setPropertyValueFromView` for changed values.
+  Plain accessor assignment and initialization do not invoke the callback.
+  View writes skip `Object.is`-equal values; explicit write APIs do not.
 - @throws {Error} when applied to anything other than a named accessor.
 
 ## validationErrorBinding
@@ -1372,7 +1385,10 @@ Besides the members inherited from `IBindingContext` it adds:
   Sets the property value and fires a `property-change` event.
 - **`registerProperty(name: string, value?: unknown, changeCallback?: (value: unknown) => void): void`**
   Registers a reactive property under a name.
-  `changeCallback` - an optional callback invoked on a value change.
+  `changeCallback` - an optional callback invoked after validation on writes
+  with `callbackExecute = true`, not during registration. View writes skip
+  `Object.is`-equal values; `setPropertyValue` does not skip such writes.
+  Plain decorated accessor assignment does not invoke the callback.
 - **`unregisterProperty(name: string): void`**
   Removes the property from the registry. Validators and validation state
   registered for the property stay untouched.
@@ -1510,7 +1526,10 @@ Methods:
   Returns a function removing this subscription.
 - **`registerProperty(name: string, value?: unknown, changeCallback?: (value: unknown) => void): void`**
   Registers a reactive property under a name.
-  `changeCallback` - an optional callback invoked on a value change.
+  `changeCallback` - an optional callback invoked after validation on writes
+  with `callbackExecute = true`, not during registration. View writes skip
+  `Object.is`-equal values; `setPropertyValue` does not skip such writes.
+  Plain decorated accessor assignment does not invoke the callback.
 - **`hasRegisteredProperty(name: string): boolean`**
   Returns `true` when the property is registered.
 - **`registerProperties(properties: { [propertyName: string]: unknown }): void`**

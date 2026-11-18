@@ -251,6 +251,21 @@ passes `callbackExecute = true`. This split is deliberate: the callback is
 meant as a hook for changes arriving from the View/DOM (e.g.
 `ResizeObserver`), not for every programmatic write from code.
 
+For a registered decorated `width` accessor with a callback:
+
+```ts
+this.width = 100;                               // no callback
+this.setPropertyValue('width', 100);             // callback, even for the same value
+this.setPropertyValueAndNotify('width', 100);    // no callback
+this.setPropertyValueAndNotify('width', 100, true); // callback
+this.setPropertyValueFromView('width', 120);     // callback because the value changed
+this.setPropertyValueFromView('width', 120);     // no write or callback (Object.is)
+```
+
+This rule applies to `@propertyChange`, `@validate` and `@propertyAlias`.
+Initialization does not invoke the callback. The callback is not a subscription
+to all `property-change` notifications.
+
 ### 3.3 ViewModel events
 
 The ViewModel exposes:
@@ -608,10 +623,11 @@ Sets the element's text:
 Use `text` when data comes from the user and should not be interpreted as
 HTML. `innerHTML` is meant for trusted HTML content or managed views.
 
-`text`, `value` and the text path of `innerHTML` use prepareValue:
-`undefined` yields empty text, but `null` throws. Normalize null to `''`
-before passing it to these bindings. The `interpolate` binding is the
-exception - it is null-safe: it renders `null` and `undefined` as empty text.
+`text`, `value` and the text path of `innerHTML` use `prepareValue`:
+`null` and `undefined` yield empty text; other values are converted through
+`String(...)`. For example, a plain object `{}` becomes `[object Object]`.
+The `interpolate` binding uses the same normalization. There is no need to
+replace `null` with an empty string beforehand.
 
 ### `interpolate`
 

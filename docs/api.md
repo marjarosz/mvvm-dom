@@ -779,8 +779,12 @@ function validate(input: ValidatorInput, callback?: string): ...
 ```
 
 - `input` - instancja walidatora, fabryka walidatora albo tablica tych elementów.
-- `callback` - opcjonalna nazwa metody wywoływanej przy zmianie wartości
-  właściwości.
+- `callback` - opcjonalna nazwa metody związanej z instancją ViewModelu.
+  Wykonuje się po walidacji przy zapisie z `callbackExecute = true`:
+  `setPropertyValue` (domyślnie), `setPropertyValueAndNotify` (jawnie)
+  oraz `setPropertyValueFromView` dla zmienionej wartości.
+  Zwykłe przypisanie akcesora ani inicjalizacja nie uruchamiają callbacku.
+  Zapis z widoku pomija wartości równe według `Object.is`; jawne API zapisu ich nie pomija.
 - @throws {Error} gdy zastosowany do czegoś innego niż nazwany akcesor.
 
 ### `propertyChange`
@@ -793,8 +797,12 @@ powiadomienie `property-change`.
 function propertyChange(callback?: string): ...
 ```
 
-- `callback` - opcjonalna nazwa metody wywoływanej przy zmianie wartości
-  właściwości (związana z instancją ViewModel).
+- `callback` - opcjonalna nazwa metody związanej z instancją ViewModelu.
+  Wykonuje się po walidacji przy zapisie z `callbackExecute = true`:
+  `setPropertyValue` (domyślnie), `setPropertyValueAndNotify` (jawnie)
+  oraz `setPropertyValueFromView` dla zmienionej wartości.
+  Zwykłe przypisanie akcesora ani inicjalizacja nie uruchamiają callbacku.
+  Zapis z widoku pomija wartości równe według `Object.is`; jawne API zapisu ich nie pomija.
 - @throws {Error} gdy zastosowany do czegoś innego niż nazwany akcesor.
 - @throws {TypeError} gdy rozwiązany callback nie jest funkcją.
 
@@ -808,8 +816,12 @@ function propertyAlias(propertyName: string, callback?: string): ...
 ```
 
 - `propertyName` - nazwa właściwości udostępniana ViewModel i bindingom.
-- `callback` - opcjonalna nazwa metody wywoływanej przy zmianie wartości
-  właściwości (związana z instancją ViewModel).
+- `callback` - opcjonalna nazwa metody związanej z instancją ViewModelu.
+  Wykonuje się po walidacji przy zapisie z `callbackExecute = true`:
+  `setPropertyValue` (domyślnie), `setPropertyValueAndNotify` (jawnie)
+  oraz `setPropertyValueFromView` dla zmienionej wartości.
+  Zwykłe przypisanie akcesora ani inicjalizacja nie uruchamiają callbacku.
+  Zapis z widoku pomija wartości równe według `Object.is`; jawne API zapisu ich nie pomija.
 - @throws {Error} gdy zastosowany do czegoś innego niż nazwany akcesor.
 
 ## validationErrorBinding
@@ -1378,7 +1390,10 @@ Oprócz członków odziedziczonych z `IBindingContext` dodaje:
   Ustawia wartość właściwości i wyzwala zdarzenie `property-change`.
 - **`registerProperty(name: string, value?: unknown, changeCallback?: (value: unknown) => void): void`**
   Rejestruje reaktywną właściwość pod nazwą.
-  `changeCallback` - opcjonalny callback wywoływany przy zmianie wartości.
+  `changeCallback` - opcjonalny callback wykonywany po walidacji przy zapisie
+  z `callbackExecute = true`, nie podczas rejestracji. Zapis z widoku pomija
+  wartości równe według `Object.is`; `setPropertyValue` nie pomija takich zapisów.
+  Przypisanie dekorowanego akcesora nie uruchamia callbacku.
 - **`unregisterProperty(name: string): void`**
   Usuwa właściwość z rejestru. Walidatory i stan walidacji zarejestrowane
   dla właściwości pozostają nietknięte.
@@ -1517,7 +1532,10 @@ Metody:
   Zwraca funkcję usuwającą tę subskrypcję.
 - **`registerProperty(name: string, value?: unknown, changeCallback?: (value: unknown) => void): void`**
   Rejestruje reaktywną właściwość pod nazwą.
-  `changeCallback` - opcjonalny callback wywoływany przy zmianie wartości.
+  `changeCallback` - opcjonalny callback wykonywany po walidacji przy zapisie
+  z `callbackExecute = true`, nie podczas rejestracji. Zapis z widoku pomija
+  wartości równe według `Object.is`; `setPropertyValue` nie pomija takich zapisów.
+  Przypisanie dekorowanego akcesora nie uruchamia callbacku.
 - **`hasRegisteredProperty(name: string): boolean`**
   Zwraca `true`, gdy właściwość jest zarejestrowana.
 - **`registerProperties(properties: { [propertyName: string]: unknown }): void`**
