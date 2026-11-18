@@ -867,11 +867,19 @@ The property stores the selected option's value, not a boolean:
   data-bind="{radio: behavior, mode: twoWay}">
 ```
 
-Register `behavior`, e.g. with the value `'skip'`. setValue compares the
-property's text value with input.value and sets checked. The `change` event
-writes input.value only for the checked input. null/undefined are treated as
-an empty string here. Updating the property's other bindings requires a
-separate notification according to section 3.1.
+Register `behavior`, e.g. with the value `'skip'`. `setValue` compares
+`String(value)` with `input.value` and sets `checked`, except for `null`
+and `undefined`: these values never match and uncheck bound radios, including
+on the first render. An empty string `''` still selects a radio with
+`value=""`. Other values retain their existing string conversion.
+
+The `change` event writes `input.value` only for a checked input. In
+`twoWay` mode, writes through the View update the model and the property's
+other bindings as described in section 3.1.
+
+**Changed in 1.0.1:** version 1.0.0 treated nullish values as an empty string.
+If the application should select `value=""`, explicitly assign `''` to the
+model; `null` or `undefined` now means no selection.
 
 ### `options`
 

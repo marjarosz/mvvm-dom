@@ -28,6 +28,19 @@ All notable changes to this project are documented in this file.
   overwrite declarations set by other bindings; use distinct `styleName`
   properties when combining bindings.
 
+- Fixed `display` binding retaining its previous state for `null` and
+  `undefined`: both now apply `falseVal` (`none` by default), including on
+  the first render. An empty string still clears only the inline `display`
+  declaration so CSS can determine the display mode. Other inline styles are
+  preserved. Added unit and browser coverage for these distinct behaviors.
+
+- Fixed `radio` binding selecting `value=""` for `null` or `undefined`.
+  Nullish values now uncheck bound radios, including on the first render;
+  an empty string still selects `value=""`. This changes the documented
+  1.0.0 behavior: applications that need the empty-value option selected must
+  explicitly use `''` instead of nullish. Non-null conversion and two-way
+  user selection remain unchanged.
+
 ## 1.0.0 - 2026-11-11
 
 First stable release.

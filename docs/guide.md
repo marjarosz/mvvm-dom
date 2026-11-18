@@ -845,11 +845,19 @@ Property przechowuje wartość wybranej opcji, nie boolean:
   data-bind="{radio: behavior, mode: twoWay}">
 ```
 
-Zarejestruj `behavior`, np. z wartością `'skip'`. setValue porównuje tekstowa
-wartość property z input.value i ustawia checked. Zdarzenie `change` zapisuje
-input.value tylko dla zaznaczonego inputa. null/undefined są tu traktowane
-jako pusty string. Aktualizacja innych bindingów property wymaga osobnego
-powiadomienia zgodnie z sekcją 3.1.
+Zarejestruj `behavior`, np. z wartością `'skip'`. `setValue` porównuje
+`String(value)` z `input.value` i ustawia `checked`, z wyjątkiem `null`
+i `undefined`: te wartości nigdy nie pasują i odznaczają powiązane radia,
+również przy pierwszym renderowaniu. Pusty string `''` nadal zaznacza radio
+z `value=""`. Pozostałe wartości zachowują dotychczasową konwersję tekstową.
+
+Zdarzenie `change` zapisuje `input.value` tylko dla zaznaczonego inputa.
+W trybie `twoWay` zapis przez View aktualizuje model i pozostałe bindingi
+tej właściwości zgodnie z sekcją 3.1.
+
+**Zmiana w 1.0.1:** w 1.0.0 nullish było traktowane jak pusty string. Jeśli
+aplikacja ma wybierać opcję `value=""`, przypisz do modelu jawnie `''`;
+`null` lub `undefined` oznacza teraz brak wyboru.
 
 ### `options`
 
