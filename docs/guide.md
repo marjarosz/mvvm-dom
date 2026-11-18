@@ -748,8 +748,11 @@ this.buttonClass = isLocked ? 'button-lock' : 'button-active';
 
 Binding zapamiętuje klasy obecne przy jego tworzeniu i zachowuje je jako
 statyczne. Przy zmianie usuwa nieaktualne klasy dynamiczne i dodaje nowe.
-Pusty string usuwa klasy dynamiczne, lecz zachowuje klasy statyczne, także
-gdy wcześniej wystąpiły również w wartości bindingu.
+`null`, `undefined` i pusty string usuwają klasy dynamiczne, lecz zachowują
+klasy statyczne, także gdy wcześniej wystąpiły również w wartości bindingu.
+Przy pierwszym renderze nullish pozostawia klasy z szablonu. Późniejsze
+przypisanie tekstu ponownie ustawia klasy dynamiczne. Pozostałe typy wartości
+(np. liczby, obiekty i tablice) są ignorowane i nie zmieniają klas.
 
 ### `style`
 

@@ -13,8 +13,12 @@ All notable changes to this project are documented in this file.
   and initialization do not invoke the callback. Explicit writes follow
   `callbackExecute`; View writes invoke it only when the value changes according
   to `Object.is`. Updated property-registration and metadata descriptions too.
-- These corrections document existing behavior; runtime behavior and public API
-  signatures are unchanged.
+- The documentation corrections above describe existing behavior.
+- Fixed `class` binding retaining stale dynamic classes for `null` and
+  `undefined`: these values now clear dynamic classes, just like an empty
+  string. Template classes remain intact, including on the first render,
+  and subsequent string values can add dynamic classes again. Other non-string
+  inputs remain ignored. Public API signatures are unchanged.
 
 ## 1.0.0 - 2026-11-11
 

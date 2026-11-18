@@ -771,8 +771,11 @@ this.buttonClass = isLocked ? 'button-lock' : 'button-active';
 
 The binding remembers the classes present when it was created and keeps them
 as static. On a change it removes stale dynamic classes and adds the new ones.
-An empty string removes the dynamic classes but keeps the static ones, even if
-they previously also occurred in the binding's value.
+`null`, `undefined` and an empty string remove the dynamic classes but keep
+the static ones, even if they previously also occurred in the binding's value.
+On the first render, nullish values preserve the template classes. A later
+string assignment sets dynamic classes again. Other value types (such as
+numbers, objects and arrays) are ignored and do not change the classes.
 
 ### `style`
 
