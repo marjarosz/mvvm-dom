@@ -20,6 +20,14 @@ All notable changes to this project are documented in this file.
   and subsequent string values can add dynamic classes again. Other non-string
   inputs remain ignored. Public API signatures are unchanged.
 
+- Fixed `style` binding retaining stale styles for `null` and `undefined`:
+  both now follow the existing empty-string behavior. With `styleName`, only
+  the named declaration is cleared; without it, the entire inline style is
+  cleared and `style=""` remains. This also clears template inline styles on
+  the first render when the bound value is nullish. Whole-style bindings can
+  overwrite declarations set by other bindings; use distinct `styleName`
+  properties when combining bindings.
+
 ## 1.0.0 - 2026-11-11
 
 First stable release.

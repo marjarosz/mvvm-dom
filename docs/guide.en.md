@@ -787,6 +787,18 @@ The `styleName` argument sets a single CSS property:
 
 Without `styleName` the binding sets the whole style text.
 
+`null`, `undefined` and `''` clear the style. With `styleName`, only the
+named CSS declaration is removed; other declarations remain. Without
+`styleName`, the entire inline style is cleared and the element retains
+`style=""`. A later value sets the style again. Numbers are still converted
+to text; other types (such as objects, arrays and booleans) are ignored.
+
+This also applies to the first render: an uninitialized model property removes
+the corresponding inline style written in the template. Without `styleName`,
+the binding owns the entire attribute and can overwrite declarations set by
+other bindings, such as `display` or `width`. To combine them, use
+`styleName` targeting a different CSS property.
+
 ### `height` and `width`
 
 ```html

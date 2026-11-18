@@ -764,6 +764,18 @@ Argument `styleName` ustawia pojedynczą własność CSS:
 
 Bez `styleName` bind ustawia cały tekst stylu.
 
+`null`, `undefined` i `''` czyszczą styl. Ze `styleName` usuwana jest
+wyłącznie wskazana deklaracja CSS; pozostałe deklaracje pozostają. Bez
+`styleName` czyszczony jest cały styl inline, a element zachowuje `style=""`.
+Późniejsza wartość ponownie ustawia styl. Liczby nadal są konwertowane na tekst,
+a pozostałe typy (np. obiekty, tablice i wartości boolean) są ignorowane.
+
+Dotyczy to również pierwszego renderowania: niezainicjalizowana właściwość
+modelu usuwa odpowiedni styl inline wpisany w szablonie. Binding bez
+`styleName` zarządza całym atrybutem i może nadpisać deklaracje ustawione przez
+inne bindingi, np. `display` lub `width`. Do współpracy z nimi używaj
+`styleName` wskazującego inną właściwość CSS.
+
 ### `height` i `width`
 
 ```html
