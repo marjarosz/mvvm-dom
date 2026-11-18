@@ -34,6 +34,19 @@ function mount(html: string, values: Record<string, unknown>): void {
 const harness = {
 
   state,
+  emptyDisplay(value: boolean | string | null | undefined) {
+
+    mount('<style>.empty-display { display: grid; }</style>' +
+      '<div id="empty-display" class="empty-display" style="display: flex; color: red" data-bind="{style: opacity, styleName: opacity}, {display: shown}">Panel</div>',
+
+      { shown: value, opacity: 0.35 });
+
+  },
+  setDisplay(value: boolean | string | null | undefined) {
+
+    model.setPropertyValueAndNotify('shown', value);
+    
+  },
   factoryView() {
 
     const source = document.createElement('template');

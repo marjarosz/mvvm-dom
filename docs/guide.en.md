@@ -735,6 +735,14 @@ For a string the display mode is set directly:
 <div data-bind="{display: displayMode}"></div>
 ```
 
+`null` and `undefined` behave like `false`: they apply `falseVal`, which
+defaults to `none`. This also applies on the first render, replacing any
+inline `display` written in the template. An empty string `''` has a different
+meaning: it clears the inline `display` declaration, allowing CSS rules to
+determine it. The binding changes only `display`; other styles, such as
+`opacity`, remain. Other types (such as numbers, objects and arrays) are
+still ignored.
+
 ### `attribute`
 
 Sets the attribute indicated by `attributeName`:

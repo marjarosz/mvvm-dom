@@ -712,6 +712,13 @@ Dla string ustawiany jest bezpośrednio tryb display:
 <div data-bind="{display: displayMode}"></div>
 ```
 
+`null` i `undefined` działają jak `false`: ustawiają `falseVal`, domyślnie
+`none`. Dotyczy to również pierwszego renderowania i zastępuje wtedy inline
+`display` wpisany w szablonie. Pusty string `''` ma inne znaczenie: usuwa
+deklarację inline `display`, pozwalając decydować regułom CSS.
+Binding zmienia wyłącznie `display`; pozostałe style, np. `opacity`, pozostają.
+Inne typy (np. liczby, obiekty i tablice) są nadal ignorowane.
+
 ### `attribute`
 
 Ustawia atrybut wskazany przez `attributeName`:

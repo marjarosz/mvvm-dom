@@ -152,3 +152,26 @@ test('drop preserves a native DataTransfer file payload', async ({ page }) => {
   expect(await page.evaluate(() => window.mvvmHarness.state.dropped)).toEqual(['sample.txt']);
 });
 
+
+for (const empty of [null, undefined]) {
+
+  test('display nullish uses none while empty string restores CSS: ' + String(empty), async ({ page }) => {
+
+    await page.evaluate(value => window.mvvmHarness.emptyDisplay(value), empty);
+    const panel = page.locator('#empty-display');
+    await expect(panel).toHaveCSS('display', 'none');
+    await expect(panel).toHaveCSS('opacity', '0.35');
+    await expect(panel).toHaveCSS('color', 'rgb(255, 0, 0)');
+    await page.evaluate(() => window.mvvmHarness.setDisplay(''));
+    await expect(panel).toHaveCSS('display', 'grid');
+    expect(await panel.evaluate(el => el.style.display)).toBe('');
+    await page.evaluate(() => window.mvvmHarness.setDisplay(true));
+    await expect(panel).toHaveCSS('display', 'block');
+    await page.evaluate(value => window.mvvmHarness.setDisplay(value), empty);
+    await expect(panel).toHaveCSS('display', 'none');
+    await expect(panel).toHaveCSS('opacity', '0.35');
+    await page.evaluate(() => window.mvvmHarness.dispose());
+
+  });
+  
+}
