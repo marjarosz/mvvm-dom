@@ -3,7 +3,10 @@
 All notable changes to this project are documented in this file.
 
 
-## 1.0.1 - Unreleased
+## 1.0.1 - 2026-11-19
+
+- Document the complete empty-value binding matrix in Polish and English, including selection errors, structural bindings, scroll no-ops and style ownership.
+- Add regression coverage for remaining empty-value contracts and decorator callback directions, including identical writes, both validation/propertyChange stacking orders and real input writeback. Verify empty style behavior against real browser CSS.
 
 - Corrected the Polish and English guides: `null` and `undefined` render as
   empty text in `text`, `value`, the text path of `innerHTML` and `interpolate`.

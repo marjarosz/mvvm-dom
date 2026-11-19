@@ -569,6 +569,34 @@ binding type** is an error as well.
 
 ## 7. Built-in bindings
 
+### Empty values (null, undefined and empty string)
+
+The table describes received values (after conversion for regular bindings; without automatic conversion for structural bindings), both on first render and on model → DOM updates. The `oneWayToSource` mode does not apply model values to the DOM.
+
+| Binding | `null` / `undefined` | `''` | Other values / notes |
+|---|---|---|---|
+| `text`, `value` | Empty text | Empty text | Other values use `String(value)`; `value` here means text controls, not file inputs. |
+| `innerHTML` | Clears content | Clears content | The text path uses `String(value)` as HTML; elements and views have separate handling. |
+| `interpolate` | Empty token text | Empty token text | Other values use `String(value)`, without interpreting HTML. |
+| `attribute` | Removes attribute | Keeps a present empty attribute | String/number set its value; boolean sets/removes it; other types are ignored. |
+| `visibility` | `hidden` | `hidden` | Truthy values → `visible`, falsy → `hidden`. |
+| `display` | `falseVal`, default `none` | Clears inline display; CSS decides | Boolean selects `trueVal`/`falseVal`, string is CSS; other types are ignored. |
+| `class` | Removes dynamic classes | Removes dynamic classes | Template classes remain; non-string types are ignored. |
+| `style` | Clears the property or whole style | Same | With `styleName`, changes only that declaration; otherwise replaces the entire attribute (leaving `style=""`). String/number supported; other types ignored. |
+| `height`, `width` | Clears that inline dimension | Clears that inline dimension | Number uses `unit` (px by default), string is CSS; other types clear the dimension. |
+| `size` | Clears both inline dimensions | Clears both inline dimensions | Expects `[width, height]`, each handled as above. An invalid pair clears both. |
+| `scrollTop`, `scrollLeft` | Leaves position unchanged | Leaves position unchanged | Only a number sets position; use `0` to reset. |
+| `checked` | Unchecks | Unchecks | Checks for `true`, string `"true"` and positive number/bigint; other values uncheck. |
+| `radio` | Matches no option | Checks radio with `value=""` | Other values are compared using `String(value)`. |
+| `options` | `TypeError` | `TypeError` | Requires an array of option records; `[]` removes options. |
+| `selectedValues` | `TypeError` | `TypeError` | Requires `string[]`; `[]` clears selection, `['']` selects an existing empty option. Does not remove options. |
+| `readonly` | Removes attribute | Removes attribute | Only `true` sets the attribute. |
+| `disabled` | Withdraws its own disabled contribution | Same | Only `true` disables; another active contribution (e.g. command) may keep the element disabled. |
+| `if` | Unmounts fragment | `TypeError` | `true` mounts, `false` unmounts; other types rejected. |
+| `collection` | No rows | `TypeError` | Requires an array (including `CollectionObserver`); `[]` removes rows. |
+
+Version 1.0.1 changes nullish rules for `class`, `style`, `display` and `radio`. Clearing `style` can remove template inline styles on first render. Whole-style binding does not protect declarations from other bindings; use `styleName` to cooperate. Pass explicit `''` for an empty radio option instead of nullish. Objects in the text path still produce e.g. `[object Object]`; this table does not introduce automatic type validation.
+
 ### `innerHTML`
 
 Inserts into the element:

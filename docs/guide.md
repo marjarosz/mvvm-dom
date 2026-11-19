@@ -545,6 +545,34 @@ fallbacku. **Nieznany typ binda** również jest błędem.
 
 ## 7. Wbudowane bindy
 
+### Puste wartości (null, undefined i pusty ciąg)
+
+Tabela opisuje wartości przekazane do bindingu (po konwersji dla bindingów zwykłych; bez automatycznej konwersji dla strukturalnych), zarówno przy pierwszym renderze, jak i aktualizacji model → DOM. Tryb `oneWayToSource` nie stosuje wartości modelu do DOM.
+
+| Bind | `null` / `undefined` | `''` | Inne wartości / uwagi |
+|---|---|---|---|
+| `text`, `value` | Pusty tekst | Pusty tekst | Pozostałe wartości przez `String(value)`; `value` tutaj dotyczy kontrolek tekstowych, nie plików. |
+| `innerHTML` | Czyści zawartość | Czyści zawartość | Ścieżka tekstowa używa `String(value)` jako HTML; osobno obsługuje elementy i widoki. |
+| `interpolate` | Pusty tekst w tokenie | Pusty tekst w tokenie | Pozostałe wartości przez `String(value)`, bez interpretacji HTML. |
+| `attribute` | Usuwa atrybut | Zachowuje atrybut z pustą wartością | String/liczba ustawiają wartość; boolean ustawia/usuwa atrybut; inne typy ignorowane. |
+| `visibility` | `hidden` | `hidden` | Wartości truthy → `visible`, falsy → `hidden`. |
+| `display` | `falseVal`, domyślnie `none` | Czyści inline display; decyduje CSS | Boolean wybiera `trueVal`/`falseVal`, string jest wartością CSS; pozostałe typy ignorowane. |
+| `class` | Usuwa klasy dynamiczne | Usuwa klasy dynamiczne | Klasy z szablonu pozostają; inne typy niż string ignorowane. |
+| `style` | Czyści własność lub cały styl | Tak samo | Ze `styleName` zmienia tylko tę deklarację; bez niego zastępuje cały atrybut (pozostaje `style=""`). String/liczba obsługiwane; inne typy ignorowane. |
+| `height`, `width` | Czyści dany wymiar inline | Czyści dany wymiar inline | Liczba używa `unit` (domyślnie px), string to CSS; inne typy czyszczą wymiar. |
+| `size` | Czyści oba wymiary inline | Czyści oba wymiary inline | Oczekuje pary `[width, height]`; każdy wymiar jak wyżej. Niepoprawna para czyści oba. |
+| `scrollTop`, `scrollLeft` | Nie zmienia pozycji | Nie zmienia pozycji | Tylko liczba ustawia pozycję; do resetu użyj `0`. |
+| `checked` | Odznacza | Odznacza | Zaznacza dla `true`, stringa `"true"` i dodatniej liczby/bigint; inne wartości odznaczają. |
+| `radio` | Nie zaznacza żadnej opcji | Zaznacza radio o `value=""` | Pozostałe wartości porównywane przez `String(value)`. |
+| `options` | `TypeError` | `TypeError` | Wymaga tablicy rekordów opcji; `[]` usuwa opcje. |
+| `selectedValues` | `TypeError` | `TypeError` | Wymaga `string[]`; `[]` usuwa zaznaczenie, `['']` wybiera istniejącą pustą opcję. Nie usuwa opcji. |
+| `readonly` | Usuwa atrybut | Usuwa atrybut | Tylko `true` ustawia atrybut. |
+| `disabled` | Wycofuje własny wkład blokady | Tak samo | Tylko `true` blokuje; inny aktywny wkład (np. komenda) może nadal blokować element. |
+| `if` | Odmontowuje fragment | `TypeError` | `true` montuje, `false` odmontowuje; inne typy odrzucane. |
+| `collection` | Brak wierszy | `TypeError` | Wymaga tablicy (również `CollectionObserver`); `[]` usuwa wiersze. |
+
+W 1.0.1 zmieniły się reguły nullish dla `class`, `style`, `display` i `radio`. Czyszczenie `style` może usunąć styl wpisany w szablonie już przy pierwszym renderze. Binding całego stylu nie chroni deklaracji innych bindingów — do współpracy używaj `styleName`. Dla pustej opcji radio przekazuj jawnie `''`, zamiast nullish. Obiekt w tekstowej ścieżce nadal daje np. `[object Object]`; tabela nie dodaje automatycznej walidacji typów.
+
 ### `innerHTML`
 
 Wstawia do elementu:
