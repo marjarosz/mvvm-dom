@@ -189,9 +189,8 @@ const dispose = () => { for (const release of cleanups.splice(0).reverse()) rele
 window.addEventListener('pagehide', event => { if (!event.persisted) dispose(); });
 
 if (import.meta.hot) import.meta.hot.dispose(dispose);
-// Native fragment scrolling may run before template views have their final height.
-
-requestAnimationFrame(() => {
+// Run after browser scroll restoration so it cannot override fragment scrolling.
+window.addEventListener('pageshow', () => requestAnimationFrame(() => {
     if (location.hash) {
 
         try { 
@@ -199,4 +198,4 @@ requestAnimationFrame(() => {
         } catch { /* Ignore malformed incoming fragment identifiers. */ }
 
     }
-});
+}), { once: true });
