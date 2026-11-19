@@ -170,7 +170,11 @@ const nav = document.getElementById('section-nav')!;
 const closeMenu = () => { document.body.classList.remove('nav-open'); shell.setPropertyValueAndNotify('menuExpanded', 'false'); };
 nav.addEventListener('click', closeMenu);
 
-const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') closeMenu(); };
+const escape = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || !document.body.classList.contains('nav-open')) return;
+    closeMenu();
+    document.querySelector<HTMLButtonElement>('.menu-button')?.focus();
+};
 document.addEventListener('keydown', escape);
 const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>('a'));
 
@@ -190,13 +194,23 @@ window.addEventListener('pagehide', event => { if (!event.persisted) dispose(); 
 
 if (import.meta.hot) import.meta.hot.dispose(dispose);
 // Native fragment scrolling may run before template views have their final height.
+const scrollToCurrentHash = () => {
+    if (!location.hash) return;
 
-requestAnimationFrame(() => {
-    if (location.hash) {
+    try {
+        const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        if (!target) return;
 
-        try { 
-            document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({ behavior: 'instant' }); 
-        } catch { /* Ignore malformed incoming fragment identifiers. */ }
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            target.scrollIntoView({ behavior: 'instant', block: 'start' });
+        }));
+    } catch { /* Ignore malformed or unsupported fragment identifiers. */ }
+};
 
-    }
+window.addEventListener('hashchange', scrollToCurrentHash);
+window.addEventListener('pageshow', scrollToCurrentHash);
+cleanups.push(() => {
+    window.removeEventListener('hashchange', scrollToCurrentHash);
+    window.removeEventListener('pageshow', scrollToCurrentHash);
 });
+scrollToCurrentHash();

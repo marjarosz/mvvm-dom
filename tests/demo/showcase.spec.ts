@@ -167,7 +167,15 @@ test('theme persists, hash links reload and mobile menu is keyboard accessible',
 
     if (testInfo.project.name === 'mobile') {
 
-        await page.locator('.menu-button').click();
+        const menuButton = page.locator('.menu-button');
+        await menuButton.focus();
+        await menuButton.press('Enter');
+        await expect(menuButton).toHaveAttribute('aria-expanded', 'true');
+        await expect(page.locator('#section-nav')).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+        await expect(menuButton).toBeFocused();
+        await menuButton.press('Enter');
         await expect(page.locator('#section-nav')).toBeVisible();
     }
 
