@@ -227,6 +227,15 @@ skip same-value writes.
 
 ### 3.2 Property callback
 
+If a validator or callback throws during `setPropertyValueFromView` or
+`setPropertyValueAndNotify`, the stored value is not rolled back. The final
+value is published before the original thrown value is rethrown. Nested writes
+of the same property within a View write still produce one completion event;
+explicit programmatic writes are not additionally batched. No completion event
+is emitted if the callback disposes the model or removes/re-registers the
+property. `setPropertyValue` remains silent, including on failure. A throwing
+validator does not imply a valid result or complete validation state.
+
 A property can have a callback run by `setPropertyValue`:
 
 ```ts
@@ -250,6 +259,21 @@ however, invoked on a write coming from the View - `setPropertyValueFromView`
 passes `callbackExecute = true`. This split is deliberate: the callback is
 meant as a hook for changes arriving from the View/DOM (e.g.
 `ResizeObserver`), not for every programmatic write from code.
+
+For a registered decorated `width` accessor with a callback:
+
+```ts
+this.width = 100;                               // no callback
+this.setPropertyValue('width', 100);             // callback, even for the same value
+this.setPropertyValueAndNotify('width', 100);    // no callback
+this.setPropertyValueAndNotify('width', 100, true); // callback
+this.setPropertyValueFromView('width', 120);     // callback because the value changed
+this.setPropertyValueFromView('width', 120);     // no write or callback (Object.is)
+```
+
+This rule applies to `@propertyChange`, `@validate` and `@propertyAlias`.
+Initialization does not invoke the callback. The callback is not a subscription
+to all `property-change` notifications.
 
 ### 3.3 ViewModel events
 
@@ -554,6 +578,34 @@ binding type** is an error as well.
 
 ## 7. Built-in bindings
 
+### Empty values (null, undefined and empty string)
+
+The table describes received values (after conversion for regular bindings; without automatic conversion for structural bindings), both on first render and on model → DOM updates. The `oneWayToSource` mode does not apply model values to the DOM.
+
+| Binding | `null` / `undefined` | `''` | Other values / notes |
+|---|---|---|---|
+| `text`, `value` | Empty text | Empty text | Other values use `String(value)`; `value` here means text controls, not file inputs. |
+| `innerHTML` | Clears content | Clears content | The text path uses `String(value)` as HTML; elements and views have separate handling. |
+| `interpolate` | Empty token text | Empty token text | Other values use `String(value)`, without interpreting HTML. |
+| `attribute` | Removes attribute | Keeps a present empty attribute | String/number set its value; boolean sets/removes it; other types are ignored. |
+| `visibility` | `hidden` | `hidden` | Truthy values → `visible`, falsy → `hidden`. |
+| `display` | `falseVal`, default `none` | Clears inline display; CSS decides | Boolean selects `trueVal`/`falseVal`, string is CSS; other types are ignored. |
+| `class` | Removes dynamic classes | Removes dynamic classes | Template classes remain; non-string types are ignored. |
+| `style` | Clears the property or whole style | Same | With `styleName`, changes only that declaration; otherwise replaces the entire attribute (leaving `style=""`). String/number supported; other types ignored. |
+| `height`, `width` | Clears that inline dimension | Clears that inline dimension | Number uses `unit` (px by default), string is CSS; other types clear the dimension. |
+| `size` | Clears both inline dimensions | Clears both inline dimensions | Expects `[width, height]`, each handled as above. An invalid pair clears both. |
+| `scrollTop`, `scrollLeft` | Leaves position unchanged | Leaves position unchanged | Only a number sets position; use `0` to reset. |
+| `checked` | Unchecks | Unchecks | Checks for `true`, string `"true"` and positive number/bigint; other values uncheck. |
+| `radio` | Matches no option | Checks radio with `value=""` | Other values are compared using `String(value)`. |
+| `options` | `TypeError` | `TypeError` | Requires an array of option records; `[]` removes options. |
+| `selectedValues` | `TypeError` | `TypeError` | Requires `string[]`; `[]` clears selection, `['']` selects an existing empty option. Does not remove options. |
+| `readonly` | Removes attribute | Removes attribute | Only `true` sets the attribute. |
+| `disabled` | Withdraws its own disabled contribution | Same | Only `true` disables; another active contribution (e.g. command) may keep the element disabled. |
+| `if` | Unmounts fragment | `TypeError` | `true` mounts, `false` unmounts; other types rejected. |
+| `collection` | No rows | `TypeError` | Requires an array (including `CollectionObserver`); `[]` removes rows. |
+
+Version 1.0.1 changes nullish rules for `class`, `style`, `display` and `radio`. Clearing `style` can remove template inline styles on first render. Whole-style binding does not protect declarations from other bindings; use `styleName` to cooperate. Pass explicit `''` for an empty radio option instead of nullish. Objects in the text path still produce e.g. `[object Object]`; this table does not introduce automatic type validation.
+
 ### `innerHTML`
 
 Inserts into the element:
@@ -608,10 +660,11 @@ Sets the element's text:
 Use `text` when data comes from the user and should not be interpreted as
 HTML. `innerHTML` is meant for trusted HTML content or managed views.
 
-`text`, `value` and the text path of `innerHTML` use prepareValue:
-`undefined` yields empty text, but `null` throws. Normalize null to `''`
-before passing it to these bindings. The `interpolate` binding is the
-exception - it is null-safe: it renders `null` and `undefined` as empty text.
+`text`, `value` and the text path of `innerHTML` use `prepareValue`:
+`null` and `undefined` yield empty text; other values are converted through
+`String(...)`. For example, a plain object `{}` becomes `[object Object]`.
+The `interpolate` binding uses the same normalization. There is no need to
+replace `null` with an empty string beforehand.
 
 ### `interpolate`
 
@@ -719,6 +772,14 @@ For a string the display mode is set directly:
 <div data-bind="{display: displayMode}"></div>
 ```
 
+`null` and `undefined` behave like `false`: they apply `falseVal`, which
+defaults to `none`. This also applies on the first render, replacing any
+inline `display` written in the template. An empty string `''` has a different
+meaning: it clears the inline `display` declaration, allowing CSS rules to
+determine it. The binding changes only `display`; other styles, such as
+`opacity`, remain. Other types (such as numbers, objects and arrays) are
+still ignored.
+
 ### `attribute`
 
 Sets the attribute indicated by `attributeName`:
@@ -755,8 +816,11 @@ this.buttonClass = isLocked ? 'button-lock' : 'button-active';
 
 The binding remembers the classes present when it was created and keeps them
 as static. On a change it removes stale dynamic classes and adds the new ones.
-An empty string removes the dynamic classes but keeps the static ones, even if
-they previously also occurred in the binding's value.
+`null`, `undefined` and an empty string remove the dynamic classes but keep
+the static ones, even if they previously also occurred in the binding's value.
+On the first render, nullish values preserve the template classes. A later
+string assignment sets dynamic classes again. Other value types (such as
+numbers, objects and arrays) are ignored and do not change the classes.
 
 ### `style`
 
@@ -767,6 +831,18 @@ The `styleName` argument sets a single CSS property:
 ```
 
 Without `styleName` the binding sets the whole style text.
+
+`null`, `undefined` and `''` clear the style. With `styleName`, only the
+named CSS declaration is removed; other declarations remain. Without
+`styleName`, the entire inline style is cleared and the element retains
+`style=""`. A later value sets the style again. Numbers are still converted
+to text; other types (such as objects, arrays and booleans) are ignored.
+
+This also applies to the first render: an uninitialized model property removes
+the corresponding inline style written in the template. Without `styleName`,
+the binding owns the entire attribute and can overwrite declarations set by
+other bindings, such as `display` or `width`. To combine them, use
+`styleName` targeting a different CSS property.
 
 ### `height` and `width`
 
@@ -828,11 +904,19 @@ The property stores the selected option's value, not a boolean:
   data-bind="{radio: behavior, mode: twoWay}">
 ```
 
-Register `behavior`, e.g. with the value `'skip'`. setValue compares the
-property's text value with input.value and sets checked. The `change` event
-writes input.value only for the checked input. null/undefined are treated as
-an empty string here. Updating the property's other bindings requires a
-separate notification according to section 3.1.
+Register `behavior`, e.g. with the value `'skip'`. `setValue` compares
+`String(value)` with `input.value` and sets `checked`, except for `null`
+and `undefined`: these values never match and uncheck bound radios, including
+on the first render. An empty string `''` still selects a radio with
+`value=""`. Other values retain their existing string conversion.
+
+The `change` event writes `input.value` only for a checked input. In
+`twoWay` mode, writes through the View update the model and the property's
+other bindings as described in section 3.1.
+
+**Changed in 1.0.1:** version 1.0.0 treated nullish values as an empty string.
+If the application should select `value=""`, explicitly assign `''` to the
+model; `null` or `undefined` now means no selection.
 
 ### `options`
 
