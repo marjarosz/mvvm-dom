@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased — planned for 1.0.2
 
+- Prevent disposed command bindings from reconnecting through callbacks retained
+  in a command-registry notification snapshot. Add lifecycle regression tests
+  for registry changes, disposal during input handling and recovery after a
+  real input callback throws, including synchronization with a surviving view.
+
 - Include the original thrown value in CompositeDisposable teardown warnings,
   preserving cleanup order, continuation after failures and idempotency.
 
