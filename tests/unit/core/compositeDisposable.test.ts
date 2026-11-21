@@ -26,16 +26,21 @@ describe('CompositeDisposable - resource ownership', () => {
 
   });
 
-  it('continues releasing other resources when one teardown throws', () => {
+  it.each([new Error('release failed'), undefined, 'failure'])('preserves the thrown value %s and continues cleanup exactly once', failure => {
 
     const owner = new CompositeDisposable();
     const release = vi.fn();
+    const calls: string[] = [];
     const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    owner.add(release);
-    owner.add(() => { throw new Error('release failed'); });
+    owner.add(() => { calls.push('first'); release(); });
+    owner.add(() => { calls.push('second'); throw failure; });
+    owner.add(() => { calls.push('third'); });
     expect(() => owner.dispose()).not.toThrow();
+    expect(() => owner.dispose()).not.toThrow();
+    expect(calls).toEqual(['third', 'second', 'first']);
     expect(release).toHaveBeenCalledTimes(1);
-    expect(warning).toHaveBeenCalled();
+    expect(warning).toHaveBeenCalledExactlyOnceWith('Error during teardown in CompositeDisposable', failure);
+    expect(warning.mock.calls[0][1]).toBe(failure);
 
   });
 

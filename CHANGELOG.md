@@ -4,6 +4,9 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased — planned for 1.0.2
 
+- Include the original thrown value in CompositeDisposable teardown warnings,
+  preserving cleanup order, continuation after failures and idempotency.
+
 - Continue command registry notifications after listener failures, then rethrow
   the first original thrown value. Preserve listener snapshots and synchronous
   nested notifications; registry changes are not rolled back. Add regression
