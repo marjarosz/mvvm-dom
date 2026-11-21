@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased — planned for 1.0.2
 
+- Continue command registry notifications after listener failures, then rethrow
+  the first original thrown value. Preserve listener snapshots and synchronous
+  nested notifications; registry changes are not rolled back. Add regression
+  tests for both registry operations and shared-view command availability.
+
 - Publish retained property values after validator/callback exceptions in
   `setPropertyValueFromView` and `setPropertyValueAndNotify`, then rethrow the
   original error. Preserve View-write coalescing, explicit-write behavior and

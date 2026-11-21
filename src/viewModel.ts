@@ -223,6 +223,8 @@ export interface IViewModel extends IBindingContext{
 
     /**
      * Registers a command and notifies command listeners.
+     * All listeners in the notification snapshot run before the first thrown
+     * value is rethrown. The registration is not rolled back.
      *
      * @param name Command name.
      * @param command Command instance.
@@ -231,6 +233,8 @@ export interface IViewModel extends IBindingContext{
 
     /**
      * Unregisters a command and notifies command listeners.
+     * All listeners in the notification snapshot run before the first thrown
+     * value is rethrown. The removal is not rolled back.
      *
      * @param name Command name.
      */
@@ -717,7 +721,7 @@ export class ViewModel implements IViewModel, IBindingContext{
     public registerCommand(name: string, command: ICommand){
 
         this.commands[name] = command;
-        for (const listener of [...this.commandListeners]) listener(name);
+        this.notifyCommandChanged(name);
     }
 
     /**
@@ -728,7 +732,27 @@ export class ViewModel implements IViewModel, IBindingContext{
     public unregisterCommand(name: string){
 
         delete this.commands[name];
-        for (const listener of [...this.commandListeners]) listener(name);
+        this.notifyCommandChanged(name);
+    }
+
+    /** Notify the entire snapshot before rethrowing the first listener failure. */
+    private notifyCommandChanged(name: string): void {
+
+        let failed = false;
+        let firstError: unknown;
+
+        for (const listener of [...this.commandListeners]) {
+            
+            try {
+                listener(name);
+            } catch (error) {
+                if (!failed) firstError = error;
+                failed = true;
+            }
+        }
+        // Keep the original thrown value, including undefined, and synchronous
+        // reentrancy. The registry mutation is committed before notification.
+        if (failed) throw firstError;
     }
 
     /**

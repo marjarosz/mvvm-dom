@@ -221,6 +221,16 @@ nie pomijają też zmian o tej samej wartości.
 
 ### 3.2 Callback property
 
+Powiadomienia rejestru komend mają osobny kontrakt błędów:
+`registerCommand` i `unregisterCommand` najpierw zmieniają rejestr, następnie
+powiadamiają wszystkich listenerów z migawki wykonanej dla tej zmiany, a na
+końcu ponownie rzucają pierwszy pierwotny wyjątek, jeśli wystąpił. Usunięcie
+listenera w trakcie powiadamiania nie usuwa go z bieżącej migawki; nowi
+listenerzy uczestniczą w kolejnych powiadomieniach. Zagnieżdżone zmiany rejestru
+są obsługiwane synchronicznie, przed kontynuacją powiadomienia zewnętrznego.
+Błędy nie cofają zmian rejestru. `dispose()` zachowuje osobny kontrakt
+agregacji błędów w `ViewModelDisposalError`.
+
 Jeśli walidator lub callback rzuci wyjątek podczas `setPropertyValueFromView`
 albo `setPropertyValueAndNotify`, zapisana wartość nie jest cofana. Końcowa
 wartość jest rozsyłana przed ponownym rzuceniem pierwotnego wyjątku. Zagnieżdżone
