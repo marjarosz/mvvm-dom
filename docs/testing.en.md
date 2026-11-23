@@ -62,7 +62,22 @@ persistence, fragment links and layout overflow. Mobile emulation is not a
 physical-device test.
 
 `npm run demo:build` creates a single HTML file that also opens directly from
-disk. GitHub deployment configuration is maintained outside this repository.
+disk. The workflow .github/workflows/demo-pages.yml builds and publishes the demo through GitHub Actions.
 The artifact to publish is `docs-demo`; run the type checks, unit tests and
 `npm run test:demo` before publishing it. Demo data is session-local; only the
 theme preference is stored in localStorage.
+
+### Enabling GitHub Pages
+
+1. In the GitHub repository select **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+2. Push the workflow and sources to **main**. Do not commit docs-demo or create a gh-pages branch.
+3. In **Actions**, open **Deploy demo to GitHub Pages**. You can also start the first run with **Run workflow**, selecting main.
+4. After deploy completes, find the site URL in the **github-pages** environment and Settings → Pages.
+
+The workflow uses Node.js 24, npm ci, type checks, unit tests and the complete test:demo (including build and Chromium/Firefox/WebKit/mobile tests). It publishes exactly the tested docs-demo directory. Only the deploy job receives pages:write and id-token:write. No personal token or npm secret is required; it does not publish the npm package.
+
+The build keeps base: './' and embeds JS/CSS in HTML, so it works under any repository subpath. The standard URL is https://OWNER.github.io/REPOSITORY/. For marjarosz/mvvm-dom-work this is https://marjarosz.github.io/mvvm-dom-work/; for marjarosz/mvvm-dom it is https://marjarosz.github.io/mvvm-dom/. Use the deployment output as the definitive URL.
+
+Manual runs on other branches are skipped. To change the deployment branch, update the push filter, build condition and github-pages environment rule. If configure-pages reports a missing site, check Source; if deploy awaits approval, check github-pages environment rules. Failed tests leave the existing site unchanged.
+
+GitHub instructions: [custom workflows for Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).

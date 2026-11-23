@@ -622,6 +622,8 @@ function autoRegisterCommands(): ...
 
 ## compositeDisposable
 
+`dispose()` loguje błędy sprzątania przez `console.warn(message, error)` i kontynuuje zwalnianie zasobów. Log zawiera oryginalną rzuconą wartość. Błąd natychmiastowego wykonania teardownu w `add()` po zwolnieniu trafia do wywołującego.
+
 Zawartość publiczna modułu: klasa `CompositeDisposable`.
 
 Zbiera wywołania zwrotne zwalniania zasobów oraz obiekty `IDisposable` i
@@ -1400,8 +1402,10 @@ Oprócz członków odziedziczonych z `IBindingContext` dodaje:
 - **`hasRegisteredProperty(name: string): boolean`**
   Zwraca `true`, gdy właściwość jest zarejestrowana.
 - **`registerCommand(name: string, command: ICommand): void`**
+  Zmienia rejestr, powiadamia wszystkich listenerów z migawki, następnie rzuca pierwszy pierwotny błąd. Powiadomienia zagnieżdżone są synchroniczne; błędy nie cofają zmiany.
   Rejestruje komendę i powiadamia nasłuchiwaczy komend.
 - **`unregisterCommand(name: string): void`**
+  Zmienia rejestr, powiadamia wszystkich listenerów z migawki, następnie rzuca pierwszy pierwotny błąd. Powiadomienia zagnieżdżone są synchroniczne; błędy nie cofają zmiany.
   Odrejestrowuje komendę i powiadamia nasłuchiwaczy komend.
 - **`registerProperties(properties: { [propertyName: string]: unknown }): void`**
   Rejestruje wiele właściwości z literalu obiektu.
@@ -1502,6 +1506,7 @@ Metody:
   `callbackExecute` - czy uruchomić callback zmiany (domyślnie `true`).
   Zwraca `true`, gdy właściwość istnieje, inaczej `false`.
 - **`setPropertyValueAndNotify(name: string, value: unknown, callbackExecute?: boolean): void`**
+  Obie metody zapisu z powiadomieniem publikują zachowaną wartość końcową po wyjątku walidatora/callbacku, następnie rzucają pierwotny błąd. Zapisy z View zachowują Object.is i scalanie zapisów zagnieżdżonych. Zwolnienie modelu lub usunięcie/ponowna rejestracja property anuluje powiadomienie końcowe. setPropertyValue pozostaje ciche. Zobacz [callback property](guide.md#32-callback-property).
   Ustawia wartość właściwości i wyzwala zdarzenie `property-change`.
   `callbackExecute` - czy uruchomić callback zmiany (domyślnie `false`).
 - **`setPropertyValueFromView(name: string, value: unknown): void`**
@@ -1544,8 +1549,10 @@ Metody:
   Usuwa właściwość z rejestru; walidatory i stan walidacji pozostają
   nietknięte.
 - **`registerCommand(name: string, command: ICommand): void`**
+  Zmienia rejestr, powiadamia wszystkich listenerów z migawki, następnie rzuca pierwszy pierwotny błąd. Powiadomienia zagnieżdżone są synchroniczne; błędy nie cofają zmiany.
   Rejestruje komendę i powiadamia nasłuchiwaczy komend.
 - **`unregisterCommand(name: string): void`**
+  Zmienia rejestr, powiadamia wszystkich listenerów z migawki, następnie rzuca pierwszy pierwotny błąd. Powiadomienia zagnieżdżone są synchroniczne; błędy nie cofają zmiany.
   Odrejestrowuje komendę i powiadamia nasłuchiwaczy komend.
 - **`hasPropertyValidator(name: string): boolean`**
   Zwraca `true`, gdy właściwość ma zarejestrowane walidatory.

@@ -618,6 +618,8 @@ function autoRegisterCommands(): ...
 
 ## compositeDisposable
 
+`dispose()` logs teardown failures with `console.warn(message, error)` and continues cleanup. The original thrown value is included. Errors from immediate teardown execution in `add()` after disposal propagate to its caller.
+
 Module's public content: the `CompositeDisposable` class.
 
 Collects resource-release callbacks and `IDisposable` objects and releases
@@ -1395,8 +1397,10 @@ Besides the members inherited from `IBindingContext` it adds:
 - **`hasRegisteredProperty(name: string): boolean`**
   Returns `true` when the property is registered.
 - **`registerCommand(name: string, command: ICommand): void`**
+  Commits the registry change, notifies every listener in the snapshot, then rethrows the first original listener error. Nested notifications are synchronous; errors do not roll back the change.
   Registers a command and notifies command listeners.
 - **`unregisterCommand(name: string): void`**
+  Commits the registry change, notifies every listener in the snapshot, then rethrows the first original listener error. Nested notifications are synchronous; errors do not roll back the change.
   Unregisters a command and notifies command listeners.
 - **`registerProperties(properties: { [propertyName: string]: unknown }): void`**
   Registers several properties from an object literal.
@@ -1497,6 +1501,7 @@ Methods:
   `callbackExecute` - whether to run the change callback (default `true`).
   Returns `true` when the property exists, otherwise `false`.
 - **`setPropertyValueAndNotify(name: string, value: unknown, callbackExecute?: boolean): void`**
+  Both notifying write methods publish the retained final value after a validator/callback throws, then rethrow the original error. View writes retain Object.is checks and nested-write coalescing. Completion is skipped after model disposal or property removal/re-registration. Silent setPropertyValue remains silent. See [property callbacks](guide.en.md#32-property-callback).
   Sets the property value and fires a `property-change` event.
   `callbackExecute` - whether to run the change callback (default `false`).
 - **`setPropertyValueFromView(name: string, value: unknown): void`**
@@ -1538,8 +1543,10 @@ Methods:
   Removes the property from the registry; validators and validation state
   stay untouched.
 - **`registerCommand(name: string, command: ICommand): void`**
+  Commits the registry change, notifies every listener in the snapshot, then rethrows the first original listener error. Nested notifications are synchronous; errors do not roll back the change.
   Registers a command and notifies command listeners.
 - **`unregisterCommand(name: string): void`**
+  Commits the registry change, notifies every listener in the snapshot, then rethrows the first original listener error. Nested notifications are synchronous; errors do not roll back the change.
   Unregisters a command and notifies command listeners.
 - **`hasPropertyValidator(name: string): boolean`**
   Returns `true` when the property has registered validators.

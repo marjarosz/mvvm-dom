@@ -41,7 +41,8 @@ export class CompositeDisposable implements IDisposable {
     /**
      * Runs all registered teardowns in reverse registration order and marks
      * this composite as disposed. An error thrown by a single teardown is
-     * reported to the console and does not stop the remaining teardowns.
+     * reported to the console with its original thrown value and does not stop
+     * the remaining teardowns.
      */
     public dispose(): void {
 
@@ -57,8 +58,8 @@ export class CompositeDisposable implements IDisposable {
                 
                 try {
                     td();
-                } catch {
-                    console.warn('Error during teardown in CompositeDisposable');
+                } catch (error) {
+                    console.warn('Error during teardown in CompositeDisposable', error);
                 }
             }
         }

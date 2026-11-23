@@ -3,6 +3,13 @@
 Run `npm run demo:dev` for development or `npm run test:demo` to check the built
 GitHub Pages artifact. See `docs/testing.en.md` for browser installation.
 
+Browser tests use two workers when `CI` is set and four locally. The workspace
+filter/reset and create/delete flows have separate test budgets; the latter
+still checks that both dialogs close and the background Reset button works.
+Retries remain disabled and the test timeout remains 30 seconds. A successful
+local run does not replace verification on the GitHub runner. Retain
+`test-results/` from a failed CI run to inspect its Playwright trace.
+
 The main workspace and each example have independent models and a reset action
 that disposes the old views before creating new ones. Source panels embed the
 actual HTML templates and TypeScript files at build time. `main.ts` is also

@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.0.2 - 2026-11-23
+
+- Prevent disposed command bindings from reconnecting through callbacks retained
+  in a command-registry notification snapshot. Add lifecycle regression tests
+  for registry changes, disposal during input handling and recovery after a
+  real input callback throws, including synchronization with a surviving view.
+
+- Include the original thrown value in CompositeDisposable teardown warnings,
+  preserving cleanup order, continuation after failures and idempotency.
+
+- Continue command registry notifications after listener failures, then rethrow
+  the first original thrown value. Preserve listener snapshots and synchronous
+  nested notifications; registry changes are not rolled back. Add regression
+  tests for both registry operations and shared-view command availability.
+
+- Publish retained property values after validator/callback exceptions in
+  `setPropertyValueFromView` and `setPropertyValueAndNotify`, then rethrow the
+  original error. Preserve View-write coalescing, explicit-write behavior and
+  silent `setPropertyValue`. Skip completion for disposed models and removed
+  or re-registered properties. Add regression coverage and document the contract.
+
 
 ## 1.0.1 - 2026-11-19
 

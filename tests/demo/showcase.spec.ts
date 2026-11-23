@@ -79,7 +79,7 @@ test('production page mounts every example without browser errors or horizontal 
 
 });
 
-test('workspace filters, validates, saves and deletes a task', async ({ page }) => {
+test('workspace filters tasks and resets an empty search', async ({ page }) => {
 
     const project = page.locator('#project');
     await project.getByRole('searchbox', { name: 'Search tasks' }).fill('keyboard');
@@ -88,6 +88,19 @@ test('workspace filters, validates, saves and deletes a task', async ({ page }) 
     await project.getByLabel('Filter status').selectOption('Done');
     await expect(project.locator('.task-item')).toHaveCount(1);
     await project.getByLabel('Filter status').selectOption('All');
+    await expect(project.locator('.task-item')).toHaveCount(4);
+    await project.getByRole('searchbox').fill('no matching task');
+    await expect(project.locator('.empty-state')).toBeVisible();
+    await expect(project.locator('.task-item')).toHaveCount(0);
+    await project.getByRole('button', { name: 'Reset demo' }).click();
+    await expect(project.getByRole('searchbox')).toHaveValue('');
+    await expect(project.locator('.task-item')).toHaveCount(4);
+
+});
+
+test('workspace validates, saves and deletes a new task', async ({ page }) => {
+
+    const project = page.locator('#project');
     await project.getByRole('button', { name: '+ New task' }).click();
     await project.getByRole('button', { name: 'Save changes', exact: true }).click();
     await expect(page.locator('#task-name-error')).toContainText('at least 3');
@@ -101,8 +114,9 @@ test('workspace filters, validates, saves and deletes a task', async ({ page }) 
     await project.getByRole('button', { name: 'Delete task', exact: true }).click();
     await project.getByRole('button', { name: 'Delete permanently', exact: true }).click();
     await expect(project.locator('.task-item')).toHaveCount(4);
-    await project.getByRole('searchbox').fill('no matching task');
-    await expect(project.locator('.empty-state')).toBeVisible();
+    await expect(project.locator('dialog[open]')).toHaveCount(0);
+    await expect(project.getByRole('button', { name: /Ship the demo/ })).toHaveCount(0);
+    // Keep a real background-control click after both dialogs close.
     await project.getByRole('button', { name: 'Reset demo' }).click();
     await expect(project.locator('.task-item')).toHaveCount(4);
 
@@ -167,7 +181,15 @@ test('theme persists, hash links reload and mobile menu is keyboard accessible',
 
     if (testInfo.project.name === 'mobile') {
 
-        await page.locator('.menu-button').click();
+        const menuButton = page.locator('.menu-button');
+        await menuButton.focus();
+        await menuButton.press('Enter');
+        await expect(menuButton).toHaveAttribute('aria-expanded', 'true');
+        await expect(page.locator('#section-nav')).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+        await expect(menuButton).toBeFocused();
+        await menuButton.press('Enter');
         await expect(page.locator('#section-nav')).toBeVisible();
     }
 

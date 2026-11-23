@@ -29,6 +29,8 @@ export class CommandBindingCoordinator {
 
     private command?: ICommand;
 
+    private disposed = false;
+
     private unsubscribeCommand?: () => void;
 
     private unsubscribeRegistry?: () => void;
@@ -86,6 +88,9 @@ export class CommandBindingCoordinator {
 
     private connect(): void {
 
+        // A registry notification may still hold this callback in its snapshot.
+        if (this.disposed) return;
+
         this.unsubscribeCommand?.();
         this.unsubscribeCommand = undefined;
         this.command = this.context?.getCommand(this.binding.propertyName);
@@ -94,6 +99,8 @@ export class CommandBindingCoordinator {
     }
 
     private update(): void {
+
+        if (this.disposed) return;
 
         const parameter = this.value();
 
@@ -104,6 +111,8 @@ export class CommandBindingCoordinator {
     }
 
     private execute(event: CommandActionEvent): void {
+
+        if (this.disposed) return;
 
         const command = this.context?.getCommand(this.binding.propertyName);
 
@@ -126,6 +135,9 @@ export class CommandBindingCoordinator {
 
     /** Releases all subscriptions and disposes the underlying event binding. */
     dispose(): void {
+
+        if (this.disposed) return;
+        this.disposed = true;
 
         this.unsubscribeRegistry?.();
         this.unsubscribeRegistry = undefined;

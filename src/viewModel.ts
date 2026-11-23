@@ -223,6 +223,8 @@ export interface IViewModel extends IBindingContext{
 
     /**
      * Registers a command and notifies command listeners.
+     * All listeners in the notification snapshot run before the first thrown
+     * value is rethrown. The registration is not rolled back.
      *
      * @param name Command name.
      * @param command Command instance.
@@ -231,6 +233,8 @@ export interface IViewModel extends IBindingContext{
 
     /**
      * Unregisters a command and notifies command listeners.
+     * All listeners in the notification snapshot run before the first thrown
+     * value is rethrown. The removal is not rolled back.
      *
      * @param name Command name.
      */
@@ -499,18 +503,19 @@ export class ViewModel implements IViewModel, IBindingContext{
      * @param value New value of the property.
      * @param callbackExecute When `true` the change callback runs
      *   (default `false`).
+     * @throws The original validator/callback error, after publishing retained
+     *   state. Disposed models and removed/re-registered properties are skipped.
      */
     public setPropertyValueAndNotify(name: string, value: unknown, callbackExecute: boolean = false){
-
-        if(this.setPropertyValue(name, value,callbackExecute)){
-            this.notifyPropertyChanged(name, this.getPropertyValue(name));
-        }
+        this.writeAndNotify(name, value, callbackExecute, false);
     }
 
     /**
      * View-originated property write used by two-way bindings.
      * A single `property-change` event is published with the final value
      * after callbacks finish; no-op when the value has not changed.
+     * Retained state is also published if validation or the callback throws,
+     * before rethrowing the original error. Disposal/removal cancels completion.
      *
      * @param name Name of the property.
      * @param value New value read from the DOM.
@@ -522,15 +527,38 @@ export class ViewModel implements IViewModel, IBindingContext{
 
         if (Object.is(this.getPropertyValue(name), value)) return;
 
-        const nested = this.pendingViewWrites.has(name);
-        this.pendingViewWrites.add(name);
+        this.writeAndNotify(name, value, true, true);
+    }
+
+    /** Complete an accepted write even if its validator or callback throws. */
+    private writeAndNotify(name: string, value: unknown, callbackExecute: boolean, fromView: boolean): void {
+        const property = this.properties[name];
+        const nested = fromView && this.pendingViewWrites.has(name);
+        if (fromView) this.pendingViewWrites.add(name);
+        let updated = false;
+        let failed = false;
+        let failure: unknown;
 
         try {
-            this.setPropertyValue(name, value, true);
+            updated = this.setPropertyValue(name, value, callbackExecute);
+        } catch (error) {
+            failed = true;
+            failure = error;
         } finally {
-            if (!nested) this.pendingViewWrites.delete(name);
+            if (fromView && !nested) this.pendingViewWrites.delete(name);
         }
-        if (!nested) this.notifyPropertyChanged(name, this.getPropertyValue(name));
+
+        // No completion event for a removed/replaced property or disposed model.
+        // Explicit writes nested inside a view write still use its suppression.
+        if (!nested && property && this.properties[name] === property && !this.disposed && (updated || failed)) {
+            try {
+                this.notifyPropertyChanged(name, this.getPropertyValue(name));
+            } catch (error) {
+                // A secondary notification failure must not replace the write error.
+                if (!failed) throw error;
+            }
+        }
+        if (failed) throw failure;
     }
 
     /**
@@ -693,7 +721,7 @@ export class ViewModel implements IViewModel, IBindingContext{
     public registerCommand(name: string, command: ICommand){
 
         this.commands[name] = command;
-        for (const listener of [...this.commandListeners]) listener(name);
+        this.notifyCommandChanged(name);
     }
 
     /**
@@ -704,7 +732,27 @@ export class ViewModel implements IViewModel, IBindingContext{
     public unregisterCommand(name: string){
 
         delete this.commands[name];
-        for (const listener of [...this.commandListeners]) listener(name);
+        this.notifyCommandChanged(name);
+    }
+
+    /** Notify the entire snapshot before rethrowing the first listener failure. */
+    private notifyCommandChanged(name: string): void {
+
+        let failed = false;
+        let firstError: unknown;
+
+        for (const listener of [...this.commandListeners]) {
+            
+            try {
+                listener(name);
+            } catch (error) {
+                if (!failed) firstError = error;
+                failed = true;
+            }
+        }
+        // Keep the original thrown value, including undefined, and synchronous
+        // reentrancy. The registry mutation is committed before notification.
+        if (failed) throw firstError;
     }
 
     /**

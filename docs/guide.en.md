@@ -227,6 +227,15 @@ skip same-value writes.
 
 ### 3.2 Property callback
 
+If a validator or callback throws during `setPropertyValueFromView` or
+`setPropertyValueAndNotify`, the stored value is not rolled back. The final
+value is published before the original thrown value is rethrown. Nested writes
+of the same property within a View write still produce one completion event;
+explicit programmatic writes are not additionally batched. No completion event
+is emitted if the callback disposes the model or removes/re-registers the
+property. `setPropertyValue` remains silent, including on failure. A throwing
+validator does not imply a valid result or complete validation state.
+
 A property can have a callback run by `setPropertyValue`:
 
 ```ts
@@ -1318,6 +1327,15 @@ private onDrop(command: ICommand) {
 
 ### 9.2 Manual registration
 
+Command registry notifications have a separate failure contract:
+`registerCommand` and `unregisterCommand` commit the registry change, notify
+every listener in a snapshot taken for that change, then rethrow the first
+original listener error, if any. Removing a listener during notification does
+not remove it from the current snapshot; newly added listeners participate in
+subsequent notifications. Nested registry changes are notified synchronously,
+before the outer notification continues. Errors do not roll back the registry.
+`dispose()` retains its separate `ViewModelDisposalError` aggregation contract.
+
 ```ts
 import { Command, type ICommand } from 'mvvm-dom';
 
@@ -1920,6 +1938,8 @@ this.items.clear();
 After `super.dispose()` a decorated property may return `undefined`.
 
 ### 12.4 CompositeDisposable
+
+`dispose()` reports each teardown failure with `console.warn(message, error)`, preserving the original thrown value, and continues with the remaining teardowns. A teardown added after disposal runs immediately; its error propagates to the caller of `add()`.
 
 ```ts
 private readonly disposables = new CompositeDisposable();
