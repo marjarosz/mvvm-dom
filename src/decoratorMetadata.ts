@@ -11,8 +11,11 @@ export type ReactivePropertyMetadata = {
     propertyName: string;
 
     /**
-     * Optional name of a method on the ViewModel instance that is bound and
-     * invoked whenever the property value changes.
+     * Optional name of a method bound to the ViewModel instance and invoked
+     * after validation when callbackExecute is true. setPropertyValue defaults
+     * to true; setPropertyValueAndNotify defaults to false. View writes enable
+     * it but skip Object.is-equal values. Explicit writes do not skip equal
+     * values. Plain accessor assignment and initialization do not invoke it.
      */
     callback?: string;
 

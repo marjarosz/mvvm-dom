@@ -21,6 +21,7 @@ function mount(html: string, values: Record<string, unknown>): void {
  
   model = new ViewModel(); model.registerProperties(values);
   model.registerCommand('submit', new Command(() => { state.commands++; }));
+  
   model.registerCommand('drop', new Command(invocation => {
     state.dropped = Array.from((invocation.commandData.sourceEvent as DragEvent).dataTransfer!.files).map(file => file.name);
   }));
@@ -34,6 +35,24 @@ function mount(html: string, values: Record<string, unknown>): void {
 const harness = {
 
   state,
+  emptyDisplay(value: boolean | string | null | undefined) {
+    mount('<style>.empty-display { display: grid; }</style>' +
+      '<div id="empty-display" class="empty-display" style="display: flex; color: red" data-bind="{style: opacity, styleName: opacity}, {display: shown}">Panel</div>',
+      { shown: value, opacity: 0.35 });
+  },
+  setDisplay(value: boolean | string | null | undefined) {
+    model.setPropertyValueAndNotify('shown', value);
+  },
+  emptyStyle(value: string | null | undefined) {
+    mount('<style>.empty-style { color: rgb(0, 128, 0); display: grid; }</style>' +
+      '<div id="named-style" class="empty-style" style="color: red; opacity: 0.35" data-bind="{style: color, styleName: color}, {display: shown}">Named</div>' +
+      '<div id="whole-style" class="empty-style" style="color: red; opacity: 0.35" data-bind="{style: whole}">Whole</div>',
+      { color: value, whole: value, shown: null });
+  },
+  setStyle(value: string | null | undefined) {
+    model.setPropertyValueAndNotify('color', value);
+    model.setPropertyValueAndNotify('whole', value == null || value === '' ? value : 'color: ' + value);
+  },
   factoryView() {
 
     const source = document.createElement('template');
