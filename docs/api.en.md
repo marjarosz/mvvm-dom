@@ -618,6 +618,8 @@ function autoRegisterCommands(): ...
 
 ## compositeDisposable
 
+`dispose()` logs teardown failures with `console.warn(message, error)` and continues cleanup. The original thrown value is included. Errors from immediate teardown execution in `add()` after disposal propagate to its caller.
+
 Module's public content: the `CompositeDisposable` class.
 
 Collects resource-release callbacks and `IDisposable` objects and releases
@@ -771,7 +773,12 @@ function validate(input: ValidatorInput, callback?: string): ...
 ```
 
 - `input` - a validator instance, a validator factory or an array of these.
-- `callback` - an optional method name invoked on a property value change.
+- `callback` - an optional method name bound to the ViewModel instance.
+  Runs after validation on writes with `callbackExecute = true`:
+  `setPropertyValue` (by default), `setPropertyValueAndNotify` (explicitly)
+  and `setPropertyValueFromView` for changed values.
+  Plain accessor assignment and initialization do not invoke the callback.
+  View writes skip `Object.is`-equal values; explicit write APIs do not.
 - @throws {Error} when applied to anything other than a named accessor.
 
 ### `propertyChange`
@@ -784,8 +791,12 @@ go through the registered property store, and a write fires a
 function propertyChange(callback?: string): ...
 ```
 
-- `callback` - an optional method name invoked on a property value change
-  (bound to the ViewModel instance).
+- `callback` - an optional method name bound to the ViewModel instance.
+  Runs after validation on writes with `callbackExecute = true`:
+  `setPropertyValue` (by default), `setPropertyValueAndNotify` (explicitly)
+  and `setPropertyValueFromView` for changed values.
+  Plain accessor assignment and initialization do not invoke the callback.
+  View writes skip `Object.is`-equal values; explicit write APIs do not.
 - @throws {Error} when applied to anything other than a named accessor.
 - @throws {TypeError} when the resolved callback is not a function.
 
@@ -799,8 +810,12 @@ function propertyAlias(propertyName: string, callback?: string): ...
 ```
 
 - `propertyName` - the property name exposed to the ViewModel and bindings.
-- `callback` - an optional method name invoked on a property value change
-  (bound to the ViewModel instance).
+- `callback` - an optional method name bound to the ViewModel instance.
+  Runs after validation on writes with `callbackExecute = true`:
+  `setPropertyValue` (by default), `setPropertyValueAndNotify` (explicitly)
+  and `setPropertyValueFromView` for changed values.
+  Plain accessor assignment and initialization do not invoke the callback.
+  View writes skip `Object.is`-equal values; explicit write APIs do not.
 - @throws {Error} when applied to anything other than a named accessor.
 
 ## validationErrorBinding
@@ -1372,15 +1387,20 @@ Besides the members inherited from `IBindingContext` it adds:
   Sets the property value and fires a `property-change` event.
 - **`registerProperty(name: string, value?: unknown, changeCallback?: (value: unknown) => void): void`**
   Registers a reactive property under a name.
-  `changeCallback` - an optional callback invoked on a value change.
+  `changeCallback` - an optional callback invoked after validation on writes
+  with `callbackExecute = true`, not during registration. View writes skip
+  `Object.is`-equal values; `setPropertyValue` does not skip such writes.
+  Plain decorated accessor assignment does not invoke the callback.
 - **`unregisterProperty(name: string): void`**
   Removes the property from the registry. Validators and validation state
   registered for the property stay untouched.
 - **`hasRegisteredProperty(name: string): boolean`**
   Returns `true` when the property is registered.
 - **`registerCommand(name: string, command: ICommand): void`**
+  Commits the registry change, notifies every listener in the snapshot, then rethrows the first original listener error. Nested notifications are synchronous; errors do not roll back the change.
   Registers a command and notifies command listeners.
 - **`unregisterCommand(name: string): void`**
+  Commits the registry change, notifies every listener in the snapshot, then rethrows the first original listener error. Nested notifications are synchronous; errors do not roll back the change.
   Unregisters a command and notifies command listeners.
 - **`registerProperties(properties: { [propertyName: string]: unknown }): void`**
   Registers several properties from an object literal.
@@ -1481,6 +1501,7 @@ Methods:
   `callbackExecute` - whether to run the change callback (default `true`).
   Returns `true` when the property exists, otherwise `false`.
 - **`setPropertyValueAndNotify(name: string, value: unknown, callbackExecute?: boolean): void`**
+  Both notifying write methods publish the retained final value after a validator/callback throws, then rethrow the original error. View writes retain Object.is checks and nested-write coalescing. Completion is skipped after model disposal or property removal/re-registration. Silent setPropertyValue remains silent. See [property callbacks](guide.en.md#32-property-callback).
   Sets the property value and fires a `property-change` event.
   `callbackExecute` - whether to run the change callback (default `false`).
 - **`setPropertyValueFromView(name: string, value: unknown): void`**
@@ -1510,7 +1531,10 @@ Methods:
   Returns a function removing this subscription.
 - **`registerProperty(name: string, value?: unknown, changeCallback?: (value: unknown) => void): void`**
   Registers a reactive property under a name.
-  `changeCallback` - an optional callback invoked on a value change.
+  `changeCallback` - an optional callback invoked after validation on writes
+  with `callbackExecute = true`, not during registration. View writes skip
+  `Object.is`-equal values; `setPropertyValue` does not skip such writes.
+  Plain decorated accessor assignment does not invoke the callback.
 - **`hasRegisteredProperty(name: string): boolean`**
   Returns `true` when the property is registered.
 - **`registerProperties(properties: { [propertyName: string]: unknown }): void`**
@@ -1519,8 +1543,10 @@ Methods:
   Removes the property from the registry; validators and validation state
   stay untouched.
 - **`registerCommand(name: string, command: ICommand): void`**
+  Commits the registry change, notifies every listener in the snapshot, then rethrows the first original listener error. Nested notifications are synchronous; errors do not roll back the change.
   Registers a command and notifies command listeners.
 - **`unregisterCommand(name: string): void`**
+  Commits the registry change, notifies every listener in the snapshot, then rethrows the first original listener error. Nested notifications are synchronous; errors do not roll back the change.
   Unregisters a command and notifies command listeners.
 - **`hasPropertyValidator(name: string): boolean`**
   Returns `true` when the property has registered validators.

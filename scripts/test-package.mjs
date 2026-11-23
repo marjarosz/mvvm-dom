@@ -47,11 +47,12 @@ try {
 
   const installed = join(temporary, 'node_modules', 'mvvm-dom');
   const installedManifest = JSON.parse(await readFile(join(installed, 'package.json'), 'utf8'));
+  if (installedManifest.version !== manifest.version) throw new Error('Tarball version differs from the source manifest');
   if (Object.keys(installedManifest.dependencies ?? {}).length) throw new Error('Tarball has runtime dependencies');
 
   let importIndex = 0;
 
-  for (const name of ['README.md', 'docs/guide.md', 'docs/custom-bindings.md', 'docs/testing.md']) {
+  for (const name of ['README.md', 'CHANGELOG.md', 'docs/guide.md', 'docs/guide.en.md', 'docs/api.md', 'docs/api.en.md', 'docs/custom-bindings.md', 'docs/custom-bindings.en.md', 'docs/testing.md', 'docs/testing.en.md']) {
     const text = await readFile(join(installed, name), 'utf8');
 
     for (const match of text.matchAll(/\]\(([^)]+)\)/g)) {

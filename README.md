@@ -138,7 +138,7 @@ content; string values passed to `innerHTML` must be trusted HTML.
 
 ## Roadmap
 
-These are future directions, **not features available in 1.0.0**. Planned items
+These are future directions, **not features available in 1.0.2**. Planned items
 express intended work; API details, release order and timing may change.
 Considering items are exploratory. No release dates are committed.
 

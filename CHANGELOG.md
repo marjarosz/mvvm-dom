@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## Unreleased — planned for 1.0.2
+## 1.0.2 - 2026-11-23
 
 - Prevent disposed command bindings from reconnecting through callbacks retained
   in a command-registry notification snapshot. Add lifecycle regression tests

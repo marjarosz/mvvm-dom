@@ -1,11 +1,16 @@
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import { decoratorTransform, oxcOptions } from './scripts/vite-transform.mts';
 
 const local = (path: string) => fileURLToPath(new URL(path, import.meta.url));
+const { version } = JSON.parse(readFileSync(local('./package.json'), 'utf8'));
 
 export default defineConfig({
-  plugins: [decoratorTransform()],
+  plugins: [decoratorTransform(), {
+    name: 'demo-package-version',
+    transformIndexHtml: html => html.split('%MVVM_VERSION%').join(version),
+  }],
   root: local('./demo'),
   base: './',
   publicDir: false,

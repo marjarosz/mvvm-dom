@@ -221,16 +221,6 @@ nie pomijają też zmian o tej samej wartości.
 
 ### 3.2 Callback property
 
-Powiadomienia rejestru komend mają osobny kontrakt błędów:
-`registerCommand` i `unregisterCommand` najpierw zmieniają rejestr, następnie
-powiadamiają wszystkich listenerów z migawki wykonanej dla tej zmiany, a na
-końcu ponownie rzucają pierwszy pierwotny wyjątek, jeśli wystąpił. Usunięcie
-listenera w trakcie powiadamiania nie usuwa go z bieżącej migawki; nowi
-listenerzy uczestniczą w kolejnych powiadomieniach. Zagnieżdżone zmiany rejestru
-są obsługiwane synchronicznie, przed kontynuacją powiadomienia zewnętrznego.
-Błędy nie cofają zmian rejestru. `dispose()` zachowuje osobny kontrakt
-agregacji błędów w `ViewModelDisposalError`.
-
 Jeśli walidator lub callback rzuci wyjątek podczas `setPropertyValueFromView`
 albo `setPropertyValueAndNotify`, zapisana wartość nie jest cofana. Końcowa
 wartość jest rozsyłana przed ponownym rzuceniem pierwotnego wyjątku. Zagnieżdżone
@@ -590,7 +580,7 @@ Tabela opisuje wartości przekazane do bindingu (po konwersji dla bindingów zwy
 | `if` | Odmontowuje fragment | `TypeError` | `true` montuje, `false` odmontowuje; inne typy odrzucane. |
 | `collection` | Brak wierszy | `TypeError` | Wymaga tablicy (również `CollectionObserver`); `[]` usuwa wiersze. |
 
-W 1.0.1 zmieniły się reguły nullish dla `class`, `style`, `display` i `radio`. Czyszczenie `style` może usunąć styl wpisany w szablonie już przy pierwszym renderze. Binding całego stylu nie chroni deklaracji innych bindingów — do współpracy używaj `styleName`. Dla pustej opcji radio przekazuj jawnie `''`, zamiast nullish. Obiekt w tekstowej ścieżce nadal daje np. `[object Object]`; tabela nie dodaje automatycznej walidacji typów.
+W 1.0.1 zmieniły się reguły nullish dla `class`, `style`, `display` i `radio`. Czyszczenie `style` może usunąć styl wpisany w szablonie już przy pierwszym renderze. Binding całego stylu nie chroni deklaracji innych bindingów - do współpracy używaj `styleName`. Dla pustej opcji radio przekazuj jawnie `''`, zamiast nullish. Obiekt w tekstowej ścieżce nadal daje np. `[object Object]`; tabela nie dodaje automatycznej walidacji typów.
 
 ### `innerHTML`
 
@@ -1304,6 +1294,16 @@ private onDrop(command: ICommand) {
 
 ### 9.2 Rejestracja ręczna
 
+Powiadomienia rejestru komend mają osobny kontrakt błędów:
+`registerCommand` i `unregisterCommand` najpierw zmieniają rejestr, następnie
+powiadamiają wszystkich listenerów z migawki wykonanej dla tej zmiany, a na
+końcu ponownie rzucają pierwszy pierwotny wyjątek, jeśli wystąpił. Usunięcie
+listenera w trakcie powiadamiania nie usuwa go z bieżącej migawki; nowi
+listenerzy uczestniczą w kolejnych powiadomieniach. Zagnieżdżone zmiany rejestru
+są obsługiwane synchronicznie, przed kontynuacją powiadomienia zewnętrznego.
+Błędy nie cofają zmian rejestru. `dispose()` zachowuje osobny kontrakt
+agregacji błędów w `ViewModelDisposalError`.
+
 ```ts
 import { Command, type ICommand } from 'mvvm-dom';
 
@@ -1893,6 +1893,8 @@ this.items.clear();
 Po `super.dispose()` dekorowane property może zwracać `undefined`.
 
 ### 12.4 CompositeDisposable
+
+`dispose()` raportuje każdy błąd sprzątania przez `console.warn(message, error)`, zachowuje oryginalną rzuconą wartość i kontynuuje pozostałe operacje. Teardown dodany po zwolnieniu wykonuje się natychmiast; jego błąd trafia do wywołującego `add()`.
 
 ```ts
 private readonly disposables = new CompositeDisposable();

@@ -1327,6 +1327,15 @@ private onDrop(command: ICommand) {
 
 ### 9.2 Manual registration
 
+Command registry notifications have a separate failure contract:
+`registerCommand` and `unregisterCommand` commit the registry change, notify
+every listener in a snapshot taken for that change, then rethrow the first
+original listener error, if any. Removing a listener during notification does
+not remove it from the current snapshot; newly added listeners participate in
+subsequent notifications. Nested registry changes are notified synchronously,
+before the outer notification continues. Errors do not roll back the registry.
+`dispose()` retains its separate `ViewModelDisposalError` aggregation contract.
+
 ```ts
 import { Command, type ICommand } from 'mvvm-dom';
 
@@ -1929,6 +1938,8 @@ this.items.clear();
 After `super.dispose()` a decorated property may return `undefined`.
 
 ### 12.4 CompositeDisposable
+
+`dispose()` reports each teardown failure with `console.warn(message, error)`, preserving the original thrown value, and continues with the remaining teardowns. A teardown added after disposal runs immediately; its error propagates to the caller of `add()`.
 
 ```ts
 private readonly disposables = new CompositeDisposable();
