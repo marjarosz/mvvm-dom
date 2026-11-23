@@ -121,8 +121,12 @@ function decorateReactiveAccessor<This extends IViewModel, Value>(
  * Stacking `@validate` and `@propertyChange` on one accessor is supported.
  *
  * @param input Validator instance, validator factory, or an array of either.
- * @param callback Optional name of a method invoked when the property value
- *   changes.
+ * @param callback Optional name of a method bound to the ViewModel instance.
+ *   Runs after validation on writes with callbackExecute = true:
+ *   setPropertyValue (default true), setPropertyValueAndNotify (explicit true),
+ *   and changed values written through setPropertyValueFromView.
+ *   Plain accessor assignment and initialization do not invoke it.
+ *   View writes skip Object.is-equal values; explicit write APIs do not.
  * @returns The accessor decorator.
  * @throws {Error} When applied to anything other than a named accessor.
  */
@@ -150,8 +154,12 @@ export function validate(input: ValidatorInput, callback?: string) {
  * Reading goes through the registered property store, and writing raises a
  * `property-change` notification.
  *
- * @param callback Optional name of a method invoked when the property value
- *   changes (bound to the ViewModel instance).
+ * @param callback Optional name of a method bound to the ViewModel instance.
+ *   Runs after validation on writes with callbackExecute = true:
+ *   setPropertyValue (default true), setPropertyValueAndNotify (explicit true),
+ *   and changed values written through setPropertyValueFromView.
+ *   Plain accessor assignment and initialization do not invoke it.
+ *   View writes skip Object.is-equal values; explicit write APIs do not.
  * @returns The accessor decorator.
  * @throws {Error} When applied to anything other than a named accessor.
  * @throws {TypeError} When the resolved callback is not a function.
@@ -179,8 +187,12 @@ export function propertyChange(callback?: string) {
  * The accessor name differs from the property name exposed to bindings.
  *
  * @param propertyName Property name exposed to the ViewModel and bindings.
- * @param callback Optional name of a method invoked when the property value
- *   changes (bound to the ViewModel instance).
+ * @param callback Optional name of a method bound to the ViewModel instance.
+ *   Runs after validation on writes with callbackExecute = true:
+ *   setPropertyValue (default true), setPropertyValueAndNotify (explicit true),
+ *   and changed values written through setPropertyValueFromView.
+ *   Plain accessor assignment and initialization do not invoke it.
+ *   View writes skip Object.is-equal values; explicit write APIs do not.
  * @returns The accessor decorator.
  * @throws {Error} When applied to anything other than a named accessor.
  */
