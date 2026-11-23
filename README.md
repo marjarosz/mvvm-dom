@@ -5,7 +5,9 @@ bindings, commands and observable collections. No runtime dependencies.
 
 [User guide](docs/guide.en.md) · [API reference](docs/api.en.md) ·
 [Demo source](https://github.com/marjarosz/mvvm-dom/tree/main/demo) ·
-[Changelog](CHANGELOG.md) · [Polska dokumentacja](docs/guide.md)
+[Live demo](https://marjarosz.github.io/mvvm-dom/) ·
+[Changelog](CHANGELOG.md) · [Polska dokumentacja](docs/guide.md) 
+
 
 ## What it does
 
